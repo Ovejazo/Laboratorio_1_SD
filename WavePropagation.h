@@ -2,24 +2,29 @@
 
 class WavePropagator {
     private:
-        Network* network;
+        Network network;
         double time_step;
     public:
-        WavePropagator(Network* net, double dt);
-        // Function overloading para integraci´on con diferentes cl´ausulas
-        void integrateEuler(); // Integraci´on b´asica
+
+        //Constructor
+        WavePropagator(Network net, double dt);
+
+        // Function overloading para integracion con diferentes clausulas
+        void integrateEuler(); // Integracion basica
         void integrateEuler(int sync_type); // atomic=0, critical=1, nowait=2
         void integrateEuler(int sync_type, bool use_barrier);
 
-        // Function overloading para c´alculo de energ´ıa
-        void calculateEnergy(); // C´alculo b´asico
+        // Function overloading para calculo de energia
+        void calculateEnergy(); // Calculo basico
         void calculateEnergy(int method); // reduce=0, atomic=1
         void calculateEnergy(int method, bool use_private);
+
         // Function overloading para procesamiento de nodos
-        void processNodes(); // Procesamiento b´asico
+        void processNodes(); // Procesamiento basico
         void processNodes(int task_type); // task=0, parallel_for=1
         void processNodes(int task_type, bool use_single);
-        // M´etodos espec´ıficos para cl´ausulas ´unicas
+
+        // Metodos especificos para clausulas unicas
         void simulatePhasesBarrier(); // Con barrier
         void parallelInitializationSingle(); // Con single
 };

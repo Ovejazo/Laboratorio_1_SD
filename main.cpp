@@ -2,8 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
-#include "Network.h"
-
+#include "WavePropagation.h"
 
 //------------------------------ MAIN --------------------------------------
 int main() {
@@ -19,7 +18,7 @@ int main() {
     std::cout << "Parametros: Nodos=" << num_nodes << ", D=" << D << ", gamma=" << gamma;
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
 
-    //Creamos nuestra network con la que vamos a trabajar con sus coeficientes
+    //Se crea una red que se llamara "my_network"
     Network my_network(num_nodes, D, gamma);
 
     // Seleccionar tipo de red (podría ser un parámetro de entrada)
@@ -75,7 +74,11 @@ int main() {
 
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
     for (int step = 1; step <= num_steps; ++step) {
-        my_network.propagateWaveSerial(dt, sources);
+
+        //Creamos la propagación
+        WavePropagator propagation(my_network, dt);
+
+        propagation.integrateEuler();
 
         // Escribir resultados de este paso en el CSV
         output_file << step;

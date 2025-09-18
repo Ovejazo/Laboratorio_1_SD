@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -O3 -fopenmp -std=c++17
 LDFLAGS = -fopenmp
 
 TARGET = wave_propagation
-SOURCES = main.cpp Node.cpp Network.cpp
+SOURCES = main.cpp Node.cpp Network.cpp WavePropagation.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 $(TARGET): $(OBJECTS)

@@ -17,25 +17,34 @@ private:
     int alto_malla;
 
 public:
+
+    //Constructor
     Network(int size, double diff_coeff, double damp_coeff);
-    void initializeLinearNetwork();
+    
+    //GETTERS
     int getSize() const;
+    int getAltoMalla() const;
+    int getAnchoMalla() const;
     double getDiffusionCoeff() const;
     double getDampingCoeff() const;
+    std::vector<Node>& getNodes();
     Node& getNode(int index);
-    const std::vector<Node>& getNodes() const;
-    void propagateWaveSerial(double time_step, const std::vector<double>& external_sources);
     std::vector<double> getCurrentAmplitudes() const;
+    std::string getNetworkType() const;
+
+    //SETTERS
+    void setDimensionesDeMalla(int ancho, int alto);
+    void setNetworkType(const std::string& type);
+
+    //Demás funciones
+    void initializeLinearNetwork();
     void initializeGrid2D(int width, int height);
     void initializeRandomNetwork(double connection_probability);
     void initializeSmallWorldNetwork(int k, double beta);
     void verifyGridConnections() const;
     void debugRandomNetwork() const;
-    void setNetworkType(const std::string& type);
-    void setDimensionesDeMalla(int ancho, int alto);
-    int getAltoMalla() const;
-    int getAnchoMalla() const;
-    std::string getNetworkType() const;
+
+
 };
 
 #endif
