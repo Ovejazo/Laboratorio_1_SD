@@ -14,12 +14,16 @@ int main() {
     const double gamma = 0.01;
     const double dt = 0.01;
     const int num_steps = 1000;
+    double energy = 0.0;
+
+    //Fuente externa
+    std::vector<double> sources(num_nodes, 0.0);
     
     std::cout << "Parametros: Nodos=" << num_nodes << ", D=" << D << ", gamma=" << gamma;
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
 
     //Se crea una red que se llamara "my_network"
-    Network my_network(num_nodes, D, gamma);
+    Network my_network(num_nodes, D, gamma, sources, dt);
 
     // Seleccionar tipo de red (podría ser un parámetro de entrada)
     std::string network_type = "linear";  // o "linear", "random", "small_world"
@@ -47,10 +51,6 @@ int main() {
         double beta = 0.1;  // probabilidad de rewiring
         my_network.initializeSmallWorldNetwork(k, beta);
     }
-    
-
-    //Fuente externa
-    std::vector<double> sources(num_nodes, 0.0);
 
     // 1. ABRIR ARCHIVO CSV PARA ESCRITURA (EVOLUCIÓN COMPLETA)
     std::ofstream output_file("results.csv");
@@ -75,14 +75,20 @@ int main() {
     output_file << "\n";
 
     //Creamos la propagación
-    WavePropagator propagation(&my_network, dt, sources);
+    WavePropagator propagation(&my_network, dt, sources, energy);
 
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
     for (int step = 1; step <= num_steps; ++step) {
 
-        // schedule_type: 0=static, 1=dynamic, 2=guided
-        propagation.integrateEuler(2);
+/*
+        schedule_type: 0=static, 1=dynamic, 2=guided
+        propagation.integrateEuler(2, true);
+*/
 
+        //Ahora vamos a implementar propagateWaves()
+        my_network.propagateWaves();
+        propagation.calculateEnergy(1);
+        propagation.processNodes(0, false);
         // Escribir resultados de este paso en el CSV
         output_file << step;
         std::vector<double> current_amplitudes = my_network.getCurrentAmplitudes();
@@ -101,6 +107,8 @@ int main() {
         }
     }
 
+    std::cout << "\nLa energía del sistema es: " << propagation.GetEnergy() << "\n";
+
     // 5. CERRAR ARCHIVO
     output_file.close();
     std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
@@ -112,5 +120,8 @@ int main() {
     std::cout << std::endl;
 
     std::cout << "Simulación serial completada exitosamente." << std::endl;
+
+    propagation.parallelInitializationSingle();
+
     return 0;
 }

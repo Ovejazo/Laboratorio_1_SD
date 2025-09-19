@@ -15,11 +15,13 @@ private:
     std::string tipo_de_network;
     int ancho_malla;
     int alto_malla;
+    std::vector<double> sources;
+    double time_step;
 
 public:
 
     //Constructor
-    Network(int size, double diff_coeff, double damp_coeff);
+    Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt);
     
     //GETTERS
     int getSize() const;
@@ -43,6 +45,12 @@ public:
     void initializeSmallWorldNetwork(int k, double beta);
     void verifyGridConnections() const;
     void debugRandomNetwork() const;
+
+    //Metodos obligatorios
+    void propagateWaves();
+    void propagateWaves(int schedule_type);
+    void propagateWaves(int schedule_type, int chunck_size);
+    void propagateWavesCollapse();
 
 
 };

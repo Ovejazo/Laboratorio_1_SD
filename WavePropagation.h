@@ -5,10 +5,14 @@ class WavePropagator {
         Network *network;
         double time_step;
         std::vector<double> sources;
+        double energy;
     public:
 
         //Constructor
-        WavePropagator(Network *net, double dt, std::vector<double> src);
+        WavePropagator(Network *net, double dt, std::vector<double> src, double energy);
+
+        //Getter
+        double GetEnergy();
 
         // Function overloading para integracion con diferentes clausulas
         void integrateEuler(); // Integracion basica
@@ -28,4 +32,6 @@ class WavePropagator {
         // Metodos especificos para clausulas unicas
         void simulatePhasesBarrier(); // Con barrier
         void parallelInitializationSingle(); // Con single
+        void calculateFinalStateLastprivate();
+        void calculateMetricsFirstprivate();
 };

@@ -6,21 +6,11 @@
 
 #include "Network.h"
 
-//Parametros de network
-    std::vector<Node> nodes;   
-    int network_size;               
-    double diffusion_coeff;         
-    double damping_coeff;  
-    std::string tipo_de_network;
-    
-    //Para la dimensión 2D
-    int ancho_malla;
-    int alto_malla;         
-
 //Funciones de network
-Network::Network(int size, double diff_coeff, double damp_coeff) 
-    : network_size(size), diffusion_coeff(diff_coeff),
-        damping_coeff(damp_coeff), ancho_malla(0), alto_malla(0) {
+Network::Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt) 
+    :   network_size(size), diffusion_coeff(diff_coeff),
+        damping_coeff(damp_coeff), ancho_malla(0), alto_malla(0),
+        sources(src), time_step(dt){
     nodes.reserve(size);
     for (int i = 0; i < size; ++i) {
         nodes.emplace_back(i, 0.0);
@@ -253,3 +243,318 @@ void Network::debugRandomNetwork() const {
     }
     std::cout << std::endl;
 };
+
+
+// ---------------------------- REALIZAMOS LAS FUNCIONES OBLIGATORIAS ---------------------------- 
+void Network::propagateWaves() {
+    // Versión serial
+    // Código similar a tu integrateEuler, pero que opere sobre los nodos
+
+    //Definimos las variables que vamos a usar
+    int network_size = this->getSize();
+    double diffusion_coeff = this->getDiffusionCoeff();
+    double damping_coeff = this->getDampingCoeff();
+    std::vector<Node>& nodes = this->getNodes();
+
+    std::vector<double> new_amplitudes(network_size, 0.0);
+
+    for (int i = 0; i < network_size; ++i) {
+
+        //obtenemos el nodo actual
+        const Node& current_node = nodes[i];
+        
+        //Conseguimos la amplitud el nodo
+        double current_amplitude = current_node.getAmplitude();
+
+        //Comenzamos a sumar las diferencias
+        double sum_of_differences = 0.0;
+
+        //Vemos los nodos vecinos del nodo que estamos viendo
+        for (int neighbor_id : current_node.getNeighbors()) {
+
+            //Conseguimos el nodo vecino de los nodos vecinos
+            const Node& neighbor = nodes[neighbor_id];
+
+            //Calculamos la diferencia de las amplitudes 
+            sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+        }
+
+        double diffusion_term = diffusion_coeff * sum_of_differences;
+        double damping_term = -damping_coeff * current_amplitude;
+        double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+        double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+        new_amplitudes[i] = current_amplitude + total_change;
+    }
+
+    for (int i = 0; i < network_size; ++i) {
+        nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+        nodes[i].setAmplitude(new_amplitudes[i]);
+    }
+
+}
+void Network::propagateWaves(int schedule_type){
+
+    //Definimos las variables que vamos a usar
+    int network_size = this->getSize();
+    double diffusion_coeff = this->getDiffusionCoeff();
+    double damping_coeff = this->getDampingCoeff();
+    std::vector<Node>& nodes = this->getNodes();
+
+    std::vector<double> new_amplitudes(network_size, 0.0);
+
+    switch (schedule_type) {
+        case 0:
+            #pragma omp parallel for schedule(static)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(static)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+        case 1:
+            #pragma omp parallel for schedule(dynamic)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(dynamic)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+        case 2:
+            #pragma omp parallel for schedule(guided)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(guided)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+    }
+}
+
+
+
+
+void Network::propagateWaves(int schedule_type, int chunck_size){
+
+    //Definimos las variables que vamos a usar
+    int network_size = this->getSize();
+    double diffusion_coeff = this->getDiffusionCoeff();
+    double damping_coeff = this->getDampingCoeff();
+    std::vector<Node>& nodes = this->getNodes();
+
+    std::vector<double> new_amplitudes(network_size, 0.0);
+
+    switch (schedule_type) {
+        case 0:
+            #pragma omp parallel for schedule(static)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(static)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+        case 1:
+            #pragma omp parallel for schedule(dynamic)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(dynamic)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+        case 2:
+            #pragma omp parallel for schedule(guided)
+            for (int i = 0; i < network_size; ++i) {
+
+                //obtenemos el nodo actual
+                const Node& current_node = nodes[i];
+                
+                //Conseguimos la amplitud el nodo
+                double current_amplitude = current_node.getAmplitude();
+
+                //Comenzamos a sumar las diferencias
+                double sum_of_differences = 0.0;
+
+                //Vemos los nodos vecinos del nodo que estamos viendo
+                for (int neighbor_id : current_node.getNeighbors()) {
+
+                    //Conseguimos el nodo vecino de los nodos vecinos
+                    const Node& neighbor = nodes[neighbor_id];
+
+                    //Calculamos la diferencia de las amplitudes 
+                    sum_of_differences += (neighbor.getAmplitude() - current_amplitude);
+                }
+
+                double diffusion_term = diffusion_coeff * sum_of_differences;
+                double damping_term = -damping_coeff * current_amplitude;
+                double source_term = (i < sources.size()) ? sources[i] : 0.0;
+
+                double total_change = time_step * (diffusion_term + damping_term + source_term);
+
+                new_amplitudes[i] = current_amplitude + total_change;
+            }
+
+            #pragma omp parallel for schedule(guided)
+            for (int i = 0; i < network_size; ++i) {
+                nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+                nodes[i].setAmplitude(new_amplitudes[i]);
+            }
+            break;
+    }
+}
+
+
+
+void Network::propagateWavesCollapse() {
+    // Usa #pragma omp for collapse(2) para loops anidados, por ejemplo para grillas 2D
+}
