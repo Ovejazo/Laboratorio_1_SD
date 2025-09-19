@@ -10,10 +10,10 @@ int main() {
     
     //Inicializamos los parametros con los que vamos a trabajar
     const int num_nodes = 100;
-    const double D = 3;
+    const double D = 20;
     const double gamma = 0.01;
     const double dt = 0.01;
-    const int num_steps = 100;
+    const int num_steps = 1000;
     
     std::cout << "Parametros: Nodos=" << num_nodes << ", D=" << D << ", gamma=" << gamma;
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
