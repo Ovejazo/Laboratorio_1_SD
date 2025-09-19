@@ -9,7 +9,7 @@ int main() {
     std::cout << "Iniciando simulador de propagación de ondas (Versión Serial)" << std::endl;
     
     //Inicializamos los parametros con los que vamos a trabajar
-    const int num_nodes = 100;
+    const int num_nodes = 50;
     const double D = 20;
     const double gamma = 0.01;
     const double dt = 0.01;
@@ -80,7 +80,8 @@ int main() {
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
     for (int step = 1; step <= num_steps; ++step) {
 
-        propagation.integrateEuler();
+        // schedule_type: 0=static, 1=dynamic, 2=guided
+        propagation.integrateEuler(2);
 
         // Escribir resultados de este paso en el CSV
         output_file << step;
