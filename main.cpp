@@ -9,11 +9,11 @@ int main() {
     std::cout << "Iniciando simulador de propagación de ondas (Versión Serial)" << std::endl;
     
     //Inicializamos los parametros con los que vamos a trabajar
-    const int num_nodes = 10;
-    const double D = 0.01;
-    const double gamma = 0.00001;
-    const double dt = 0.0001;
-    const int num_steps = 2000;
+    const int num_nodes = 100;
+    const double D = 1;
+    const double gamma = 0.01;
+    const double dt = 0.01;
+    const int num_steps = 100;
     
     std::cout << "Parametros: Nodos=" << num_nodes << ", D=" << D << ", gamma=" << gamma;
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
@@ -48,6 +48,8 @@ int main() {
         my_network.initializeSmallWorldNetwork(k, beta);
     }
     
+
+    //Fuente externa
     std::vector<double> sources(num_nodes, 0.0);
 
     // 1. ABRIR ARCHIVO CSV PARA ESCRITURA (EVOLUCIÓN COMPLETA)
@@ -72,11 +74,11 @@ int main() {
     }
     output_file << "\n";
 
+    //Creamos la propagación
+    WavePropagator propagation(&my_network, dt, sources);
+
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
     for (int step = 1; step <= num_steps; ++step) {
-
-        //Creamos la propagación
-        WavePropagator propagation(my_network, dt);
 
         propagation.integrateEuler();
 

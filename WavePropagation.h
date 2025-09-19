@@ -2,12 +2,13 @@
 
 class WavePropagator {
     private:
-        Network network;
+        Network *network;
         double time_step;
+        std::vector<double> sources;
     public:
 
         //Constructor
-        WavePropagator(Network net, double dt);
+        WavePropagator(Network *net, double dt, std::vector<double> src);
 
         // Function overloading para integracion con diferentes clausulas
         void integrateEuler(); // Integracion basica

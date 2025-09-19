@@ -5,17 +5,17 @@
 
 
 //Constructor de WavePropagator
-WavePropagator::WavePropagator(Network net, double dt)
-    : network(net), time_step(dt) {}
+WavePropagator::WavePropagator(Network *net, double dt, std::vector<double> src) 
+    : network(net), time_step(dt), sources(src){}
     
 
 void WavePropagator::integrateEuler(){
 
     //Definimos las variables que vamos a usar
-    int network_size = network.getSize();
-    double diffusion_coeff = network.getDiffusionCoeff();
-    double damping_coeff = network.getDampingCoeff();
-    std::vector<Node>& nodes = network.getNodes();
+    int network_size = network->getSize();
+    double diffusion_coeff = network->getDiffusionCoeff();
+    double damping_coeff = network->getDampingCoeff();
+    std::vector<Node>& nodes = network->getNodes();
 
     std::vector<double> new_amplitudes(network_size, 0.0);
 
@@ -42,7 +42,7 @@ void WavePropagator::integrateEuler(){
 
         double diffusion_term = diffusion_coeff * sum_of_differences;
         double damping_term = -damping_coeff * current_amplitude;
-        double source_term = 0.2;
+        double source_term = (i < sources.size()) ? sources[i] : 0.0;
 
         double total_change = time_step * (diffusion_term + damping_term + source_term);
 
