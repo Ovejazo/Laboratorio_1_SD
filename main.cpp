@@ -13,7 +13,7 @@ int main() {
     const double D = 20;
     const double gamma = 0.01;
     const double dt = 0.01;
-    const int num_steps = 1000;
+    const int num_steps = 100;
     double energy = 0.0;
 
     //Fuente externa
@@ -27,6 +27,8 @@ int main() {
 
     //Creamos un red. 0 para 1D y 1 para 2D
     my_network.initializedRegularNetwork(1);
+    my_network.setSource(sources);
+    my_network.setTimeStep(dt);
 
     // Seleccionar tipo de red (podría ser un parámetro de entrada)
     /*std::string network_type = "linear";  // o "linear", "random", "small_world"
@@ -74,10 +76,12 @@ int main() {
 
     // 3. ESCRIBIR ESTADO INICIAL (Paso 0)
     output_file << "0";
+    /*
     std::vector<double> initial_amplitudes = my_network.getCurrentAmplitudes();
     for (double amp : initial_amplitudes) {
         output_file << "," << std::scientific << std::setprecision(6) << amp;
     }
+    */
     output_file << "\n";
 
     //Creamos la propagación
@@ -92,7 +96,9 @@ int main() {
 */
 
         //Ahora vamos a implementar propagateWaves()
+        std::cout << "Antes de entrar a propagateWaves\n";
         my_network.propagateWaves();
+/*
         propagation.calculateEnergy(1);
         propagation.processNodes(0, false);
         // Escribir resultados de este paso en el CSV
@@ -102,8 +108,9 @@ int main() {
             output_file << "," << std::scientific << std::setprecision(6) << amp;
         }
         output_file << "\n";
-
+        */
         // Imprimir en consola cada 25 pasos
+        /*
         if (step % 25 == 0) {
             std::cout << "Paso " << step << ": ";
             for (int i = 0; i < num_nodes; ++i) {
@@ -111,6 +118,7 @@ int main() {
             }
             std::cout << std::endl;
         }
+        */
     }
 
     std::cout << "\nLa energía del sistema es: " << propagation.GetEnergy() << "\n";
@@ -118,11 +126,12 @@ int main() {
     // 5. CERRAR ARCHIVO
     output_file.close();
     std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
-
+    /*
     std::cout << "Estado final: ";
     for (int i = 0; i < num_nodes; ++i) {
         std::cout << my_network.getNode(i).getAmplitude() << " ";
     }
+    */
     std::cout << std::endl;
 
     std::cout << "Simulación serial completada exitosamente." << std::endl;

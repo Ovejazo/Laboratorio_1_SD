@@ -9,17 +9,21 @@
 
 //Funciones de network
 Network::Network(int size, double diff_coeff, double damp_coeff) 
-    :   network_size(size), diffusion_coeff(diff_coeff), damping_coeff(damp_coeff){
-        nodes.clear();
+    :   network_size(size),
+        diffusion_coeff(diff_coeff),
+        damping_coeff(damp_coeff),
+        ancho_malla(0),
+        alto_malla(0),
+        initialized(false)
+{
         nodes.reserve(network_size);
         for(int i = 0; i < network_size; ++i){
             nodes.emplace_back(i, 0.0);
         }
+        scratch_amplitudes.assign(network_size, 0.0);
 }
 
 void Network::initializedRegularNetwork(int dimensions, int w, int h){
-    nodes.clear();
-
     if (dimensions == 1){
 
         //Como es unidimensional, sera lineal
@@ -35,7 +39,6 @@ void Network::initializedRegularNetwork(int dimensions, int w, int h){
         //Definimos el alto y el largo
         alto_malla = h;
         ancho_malla = w;
-        nodes.resize(network_size);
 
         //Hasta 4 vecinos posiblemente conectados
         auto idx = [w](int r, int c){return r*w+c; };
@@ -54,6 +57,42 @@ void Network::initializedRegularNetwork(int dimensions, int w, int h){
 
     initialized = true;
     scratch_amplitudes.assign(network_size, 0.0);
+}
+
+void Network::propagateWaves(){
+    //Vamos a imprimir un mensaje de que entro a la función
+    std::cout << "Se ha entrado a propagateWaves\n";
+
+    if(!initialized){
+        std::cerr << "Se llamo la función antes de iniciar\n";
+    }
+    if(time_step <= 0.0){
+        std::cerr << "Los pasos no han sido configurados\n";
+        time_step = 0.01;
+    }
+
+    //Definimos las variables que vamos a usarç
+    const int N = network_size;
+    const double D = diffusion_coeff;
+    const double gamma = damping_coeff;
+    std::vector<double> new_amplitude(N, 0.0);
+
+    for(int i = 0; i < N; ++i){
+        const Node& node = nodes[i];
+        double A = node.getAmplitude();
+        double sum_diff = 0.0;
+        for(int nb : node.getNeighbors()){
+            sum_diff += (nodes[nb].getAmplitude() - A);
+        }
+        double source_term = (i < (int)sources.size()) ? sources[i] : 0.0;
+        double delta = time_step * (D * sum_diff - gamma * A + source_term);
+        new_amplitude[i] = A + delta;
+    }
+
+    for(int i = 0; i < N; ++i){
+        nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+        nodes[i].setAmplitude(new_amplitude[i]);
+    }
 }
 /*
 //Funciones de network
