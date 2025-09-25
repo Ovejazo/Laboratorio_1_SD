@@ -32,8 +32,8 @@ public:
     //Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt);
     
     //Funciones que piden en el enunciado
-    void initializedRandomNetwork();
-    void initializedRegularNetwork(int dimensions, int w = 0, int h = 0);
+    void initializeRandomNetwork();
+    void initializeRegularNetwork(int dimensions, int w = 0, int h = 0);
 
     //GETTERS
     int getSize() const { return network_size; }
@@ -46,12 +46,17 @@ public:
     int getAltoMalla() const {return alto_malla;}
     int getAnchoMalla() const {return ancho_malla;}
     Node& getNode(int index);
-    std::vector<double> getCurrentAmplitudes() const;
+    std::vector<double> getCurrentAmplitudes() const {
+        std::vector<double> out;
+        out.reserve(nodes.size());
+        for(auto& n : nodes) out.push_back(n.getAmplitude());
+        return out;
+    };
     //std::string getNetworkType() const;
 
     //SETTERS
     void setTimeStep(double dt) {time_step = dt;}
-    void setSource(const std::vector<double>& src) { sources = src;}
+    void setSources(const std::vector<double>& src) { sources = src;}
     //void setDimensionesDeMalla(int ancho, int alto);
     //void setNetworkType(const std::string& type);
 

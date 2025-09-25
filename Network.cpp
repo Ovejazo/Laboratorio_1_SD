@@ -23,7 +23,7 @@ Network::Network(int size, double diff_coeff, double damp_coeff)
         scratch_amplitudes.assign(network_size, 0.0);
 }
 
-void Network::initializedRegularNetwork(int dimensions, int w, int h){
+void Network::initializeRegularNetwork(int dimensions, int w, int h){
     if (dimensions == 1){
 
         //Como es unidimensional, sera lineal
@@ -31,6 +31,11 @@ void Network::initializedRegularNetwork(int dimensions, int w, int h){
             if (i > 0) nodes[i].addNeighbor(i - 1);
             if (i < network_size - 1) nodes[i].addNeighbor(i + 1);
         }
+
+        if (!nodes.empty()) {
+            nodes[0].setAmplitude(1.0);
+        }
+        std::cout << "Red lineal inicializada con " << network_size << " nodos." << std::endl;
     }else if (dimensions == 2){
         if(h*w != network_size){
             throw std::runtime_error("Dimensiones erroneas");
@@ -61,8 +66,6 @@ void Network::initializedRegularNetwork(int dimensions, int w, int h){
 
 void Network::propagateWaves(){
     //Vamos a imprimir un mensaje de que entro a la función
-    std::cout << "Se ha entrado a propagateWaves\n";
-
     if(!initialized){
         std::cerr << "Se llamo la función antes de iniciar\n";
     }
@@ -87,6 +90,7 @@ void Network::propagateWaves(){
         double source_term = (i < (int)sources.size()) ? sources[i] : 0.0;
         double delta = time_step * (D * sum_diff - gamma * A + source_term);
         new_amplitude[i] = A + delta;
+
     }
 
     for(int i = 0; i < N; ++i){
@@ -643,3 +647,5 @@ void Network::propagateWavesCollapse() {
 }
 
 */
+
+Node& Network::getNode(int i){ return this->nodes[i]; }
