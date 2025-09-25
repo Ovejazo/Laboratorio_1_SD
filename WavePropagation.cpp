@@ -540,7 +540,7 @@ void WavePropagator::calculateMetricsFirstprivate() {
         // Aquí solo para demostrar el uso de firstprivate
         #pragma omp critical
         {
-            std::cout << "Hilo " << omp_get_thread_num() << " nodo " << i << " valor: " << value << std::endl;
+            //std::cout << "Hilo " << omp_get_thread_num() << " nodo " << i << " valor: " << value << std::endl;
         }
     }
 }

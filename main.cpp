@@ -23,10 +23,13 @@ int main() {
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
 
     //Se crea una red que se llamara "my_network"
-    Network my_network(num_nodes, D, gamma, sources, dt);
+    Network my_network(num_nodes, D, gamma);
+
+    //Creamos un red. 0 para 1D y 1 para 2D
+    my_network.initializedRegularNetwork(1);
 
     // Seleccionar tipo de red (podría ser un parámetro de entrada)
-    std::string network_type = "linear";  // o "linear", "random", "small_world"
+    /*std::string network_type = "linear";  // o "linear", "random", "small_world"
     
     if (network_type == "linear") {
         my_network.initializeLinearNetwork();
@@ -51,6 +54,9 @@ int main() {
         double beta = 0.1;  // probabilidad de rewiring
         my_network.initializeSmallWorldNetwork(k, beta);
     }
+
+    */
+
 
     // 1. ABRIR ARCHIVO CSV PARA ESCRITURA (EVOLUCIÓN COMPLETA)
     std::ofstream output_file("results.csv");
@@ -122,6 +128,9 @@ int main() {
     std::cout << "Simulación serial completada exitosamente." << std::endl;
 
     propagation.parallelInitializationSingle();
+    propagation.calculateMetricsFirstprivate();
+    propagation.calculateFinalStateLastprivate();
+    propagation.simulatePhasesBarrier();
 
     return 0;
 }

@@ -1,11 +1,61 @@
 #include <random>
 #include <algorithm> 
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 
 #include "Network.h"
 
+//Funciones de network
+Network::Network(int size, double diff_coeff, double damp_coeff) 
+    :   network_size(size), diffusion_coeff(diff_coeff), damping_coeff(damp_coeff){
+        nodes.clear();
+        nodes.reserve(network_size);
+        for(int i = 0; i < network_size; ++i){
+            nodes.emplace_back(i, 0.0);
+        }
+}
+
+void Network::initializedRegularNetwork(int dimensions, int w, int h){
+    nodes.clear();
+
+    if (dimensions == 1){
+
+        //Como es unidimensional, sera lineal
+        for (int i = 0; i < network_size; ++i) {
+            if (i > 0) nodes[i].addNeighbor(i - 1);
+            if (i < network_size - 1) nodes[i].addNeighbor(i + 1);
+        }
+    }else if (dimensions == 2){
+        if(h*w != network_size){
+            throw std::runtime_error("Dimensiones erroneas");
+        }
+
+        //Definimos el alto y el largo
+        alto_malla = h;
+        ancho_malla = w;
+        nodes.resize(network_size);
+
+        //Hasta 4 vecinos posiblemente conectados
+        auto idx = [w](int r, int c){return r*w+c; };
+        for(int r = 0; r < alto_malla; ++r){
+            for(int c = 0; c < ancho_malla; ++c){
+                int id = idx(r,c);
+                if (r > 0) nodes[id].addNeighbor(idx(r-1,c));
+                if (r < alto_malla - 1) nodes[id].addNeighbor(idx(r+1,c));
+                if (c > 0) nodes[id].addNeighbor(idx(r,c-1));
+                if (c < ancho_malla - 1) nodes[id].addNeighbor(idx(r,c+1));
+            }
+        }
+    } else {
+        throw std::runtime_error("Solo se soporta 2 dimensiones...");
+    }
+
+    initialized = true;
+    scratch_amplitudes.assign(network_size, 0.0);
+}
+/*
 //Funciones de network
 Network::Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt) 
     :   network_size(size), diffusion_coeff(diff_coeff),
@@ -31,12 +81,6 @@ void Network::initializeLinearNetwork() {
     }
     std::cout << "Red lineal inicializada con " << network_size << " nodos." << std::endl;
 }
-
-int Network::getSize() const { return network_size; }
-double Network::getDiffusionCoeff() const { return diffusion_coeff; }
-double Network::getDampingCoeff() const { return damping_coeff; }
-Node& Network::getNode(int index) { return nodes[index]; }
-std::vector<Node>& Network::getNodes() { return nodes; }
 
 // Función para obtener todas las amplitudes actuales
 std::vector<double> Network::getCurrentAmplitudes() const {
@@ -93,8 +137,8 @@ void Network::initializeGrid2D(int width, int height) {
             }
         }
     }
-    
 
+    
         int center_x = width / 2;
         int center_y = height / 2;
         int center_id = center_y * width + center_x;
@@ -558,3 +602,5 @@ void Network::propagateWaves(int schedule_type, int chunck_size){
 void Network::propagateWavesCollapse() {
     // Usa #pragma omp for collapse(2) para loops anidados, por ejemplo para grillas 2D
 }
+
+*/

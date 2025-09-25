@@ -12,31 +12,48 @@ private:
     int network_size;
     double diffusion_coeff;
     double damping_coeff;
-    std::string tipo_de_network;
-    int ancho_malla;
-    int alto_malla;
+
+    //En caso de que sea una network 2D
+    int ancho_malla = 0.0;
+    int alto_malla = 0.0;
+
     std::vector<double> sources;
-    double time_step;
+    double time_step = 0.0;
+    //string tipo_network;
+
+    std::vector<double> scratch_amplitudes;
+
+    bool initialized = false;
 
 public:
 
     //Constructor
-    Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt);
+    Network(int size, double diff_coeff, double damp_coeff);
+    //Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt);
     
+    //Funciones que piden en el enunciado
+    void initializedRandomNetwork();
+    void initializedRegularNetwork(int dimensions, int w = 0, int h = 0);
+
     //GETTERS
-    int getSize() const;
-    int getAltoMalla() const;
-    int getAnchoMalla() const;
-    double getDiffusionCoeff() const;
-    double getDampingCoeff() const;
-    std::vector<Node>& getNodes();
+    int getSize() const { return network_size; }
+    double getDiffusionCoeff() const { return diffusion_coeff;}
+    double getDampingCoeff() const { return damping_coeff; } 
+    std::vector<Node>& getNodes() {return nodes; }
+    const std::vector<Node>& getNodes() const {return nodes; }
+    bool inInitialized() const {return initialized;}
+
+    int getAltoMalla() const {return alto_malla;}
+    int getAnchoMalla() const {return ancho_malla;}
     Node& getNode(int index);
     std::vector<double> getCurrentAmplitudes() const;
-    std::string getNetworkType() const;
+    //std::string getNetworkType() const;
 
     //SETTERS
-    void setDimensionesDeMalla(int ancho, int alto);
-    void setNetworkType(const std::string& type);
+    void setTimeStep(double dt) {time_step = dt;}
+    void setSource(const std::vector<double>& src) { sources = src;}
+    //void setDimensionesDeMalla(int ancho, int alto);
+    //void setNetworkType(const std::string& type);
 
     //Demás funciones
     void initializeLinearNetwork();
