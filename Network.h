@@ -34,6 +34,7 @@ public:
     //Funciones que piden en el enunciado
     void initializeRandomNetwork();
     void initializeRegularNetwork(int dimensions, int w = 0, int h = 0);
+    void propagateCore();
 
     //GETTERS
     int getSize() const { return network_size; }
@@ -74,7 +75,8 @@ public:
     void propagateWaves(int schedule_type, int chunck_size);
     void propagateWavesCollapse();
 
-
+private:
+    void propagateCore(int schedule_type, int chunk_size, bool use_chunk);
 };
 
 #endif

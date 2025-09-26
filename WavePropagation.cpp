@@ -7,8 +7,8 @@
 
 
 //Constructor de WavePropagator
-WavePropagator::WavePropagator(Network *net, double dt, std::vector<double> src, double energy) 
-    : network(net), time_step(dt), sources(src), energy(energy){}
+WavePropagator::WavePropagator(Network *net, double dt, std::vector<double> src, double initial_energy) 
+    : network(net), time_step(dt), sources(src), energy(initial_energy){}
     
 //GETTERS
 double WavePropagator::GetEnergy(){ return energy; }

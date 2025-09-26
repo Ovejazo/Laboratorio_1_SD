@@ -1,13 +1,23 @@
+#include <ios>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <iomanip>
 #include "WavePropagation.h"
 
+#include <omp.h>
+
 //------------------------------ MAIN --------------------------------------
-int main() {
+int main(int argc, char** argv) {
     std::cout << "Iniciando simulador de propagación de ondas (Versión Serial)" << std::endl;
-    
+    //Vamos a definir el schedule_type y el chunk_size como valores de entrada
+    int schedule_type = 0;
+    int chunk_size = 0;
+
+    //Conseguimos valores dependiendo del valor de argc
+    if(argc >= 2) schedule_type = std::stoi(argv[1]);
+    if(argc >= 3) chunk_size = std::stoi(argv[2]);
+
     //Inicializamos los parametros con los que vamos a trabajar
     const int num_nodes = 50;
     const double D = 20;
@@ -23,82 +33,81 @@ int main() {
     std::cout << ", dt=" << dt << ", Pasos=" << num_steps << std::endl;
 
     //Se crea una red que se llamara "my_network"
-    Network my_network(num_nodes, D, gamma);
+    Network myNetwork(num_nodes, D, gamma);
 
     //Creamos un red. 0 para 1D y 1 para 2D
-    my_network.initializeRegularNetwork(1);
-    my_network.setSources(sources);
-    my_network.setTimeStep(dt);
+    myNetwork.initializeRegularNetwork(1);
+    myNetwork.setTimeStep(dt);
+    myNetwork.setSources(sources);
+
+    //Vamos a definir la pertubación inicial para que la señal se mueva
+    myNetwork.getNode(num_nodes/2).setAmplitude(1.0);
+
+    //Creamos el objeto WavePropagator
+    WavePropagator propagation(&myNetwork, dt, sources, energy);
 
     // 1. ABRIR ARCHIVO CSV PARA ESCRITURA (EVOLUCIÓN COMPLETA)
-    std::ofstream output_file("results.csv");
-    if (!output_file.is_open()) {
+    std::ofstream csv("results.csv");
+    if (!csv.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo results.csv" << std::endl;
         return 1;
     }
 
     // 2. ESCRIBIR CABECERA (Time_Step + Node_0, Node_1, ..., Node_9)
-    output_file << "Time_Step";
-    for (int i = 0; i < num_nodes; ++i) {
-        output_file << ",Node_" << i;
-    }
-    output_file << "\n";
+    csv << "Time_Step,energy";
+    for (int i = 0; i < num_nodes; ++i) csv << ",Node_" << i;
+    csv << "\n";
 
     // 3. ESCRIBIR ESTADO INICIAL (Paso 0)
-    output_file << "0";
-    std::vector<double> initial_amplitudes = my_network.getCurrentAmplitudes();
+    propagation.calculateEnergy(0);
+    csv << 0 << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy();
+    std::vector<double> initial_amplitudes = myNetwork.getCurrentAmplitudes();
     for (double amp : initial_amplitudes) {
-        output_file << "," << std::scientific << std::setprecision(6) << amp;
+        csv << "," << std::scientific << std::setprecision(6) << amp;
     }
-    output_file << "\n";
+    csv << "\n";
 
-    //Creamos la propagación
-    WavePropagator propagation(&my_network, dt, sources, energy);
 
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
+    double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
+        if(chunk_size > 0)
+            myNetwork.propagateWaves(schedule_type, chunk_size);
+        else
+            myNetwork.propagateWaves(schedule_type);
 
-/*
-        schedule_type: 0=static, 1=dynamic, 2=guided
-        propagation.integrateEuler(2, true);
-*/
+        propagation.calculateEnergy(1); //Usamos parallel reduction
 
-        //Ahora vamos a implementar propagateWaves()
-        my_network.propagateWaves();
-/*
-        propagation.calculateEnergy(1);
-        propagation.processNodes(0, false);
- */
-        // Escribir resultados de este paso en el CSV
-        output_file << step;
-        std::vector<double> current_amplitudes = my_network.getCurrentAmplitudes();
+        csv << step << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy();;
+        std::vector<double> current_amplitudes = myNetwork.getCurrentAmplitudes();
         for (double amp : current_amplitudes) {
-            output_file << "," << std::scientific << std::setprecision(6) << amp;
+            csv << "," << std::scientific << std::setprecision(6) << amp;
         }
-        output_file << "\n";
-        // Imprimir en consola cada 25 pasos
-        
-        if (step % 25 == 0) {
-            std::cout << "Paso " << step << ": ";
-            for (int i = 0; i < num_nodes; ++i) {
-                std::cout << my_network.getNode(i).getAmplitude() << " ";
-            }
-            std::cout << std::endl;
+        csv << "\n";
+
+        if (step % 25 == 0){
+                std::cout << "\nPaso " << step << "\nEnergía=" << propagation.GetEnergy() << "\n";
+
         }
+        std::cout << myNetwork.getNode(step).getAmplitude() << " " << "paso:" << step; 
     }
+
 
     std::cout << "\nLa energía del sistema es: " << propagation.GetEnergy() << "\n";
 
     // 5. CERRAR ARCHIVO
-    output_file.close();
+    double t1 = omp_get_wtime();
+    std::cout << "Tiempo total: " << (t1 - t0) << "s\n";
+    
+    csv.close();
     std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
-    /*
+    std::cout << std::endl;
+
     std::cout << "Estado final: ";
     for (int i = 0; i < num_nodes; ++i) {
-        std::cout << my_network.getNode(i).getAmplitude() << " ";
+        std::cout << myNetwork.getNode(i).getAmplitude() << " ";
     }
-    */
-    std::cout << std::endl;
+    
 
     std::cout << "Simulación serial completada exitosamente." << std::endl;
 
@@ -108,4 +117,23 @@ int main() {
     propagation.simulatePhasesBarrier();
 
     return 0;
+
+
+
+
+/*
+        schedule_type: 0=static, 1=dynamic, 2=guided
+        propagation.integrateEuler(2, true);
+*/
+
+        //Ahora vamos a implementar propagateWaves()
+/*
+        propagation.calculateEnergy(1);
+        propagation.processNodes(0, false);
+ */
+        // Escribir resultados de este paso en el CSV
+
+        // Imprimir en consola cada 25 pasos
+
+
 }

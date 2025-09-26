@@ -65,6 +65,18 @@ void Network::initializeRegularNetwork(int dimensions, int w, int h){
 }
 
 void Network::propagateWaves(){
+    propagateCore(0, 0, false);
+}
+
+void Network::propagateWaves(int schedule_type){
+    propagateCore(schedule_type, 0, false);
+}
+
+void Network::propagateWaves(int schedule_type, int chunk_size){
+    propagateCore(schedule_type, chunk_size, true);
+}
+
+void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
     //Vamos a imprimir un mensaje de que entro a la función
     if(!initialized){
         std::cerr << "Se llamo la función antes de iniciar\n";

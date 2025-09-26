@@ -6,10 +6,11 @@ class WavePropagator {
         double time_step;
         std::vector<double> sources;
         double energy;
+
     public:
 
         //Constructor
-        WavePropagator(Network *net, double dt, std::vector<double> src, double energy);
+        WavePropagator(Network *net, double dt, std::vector<double> src, double initial_energy);
 
         //Getter
         double GetEnergy();
