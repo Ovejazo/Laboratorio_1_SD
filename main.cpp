@@ -20,10 +20,10 @@ int main(int argc, char** argv) {
 
     //Inicializamos los parametros con los que vamos a trabajar
     const int num_nodes = 50;
-    const double D = 20;
+    const double D = 0.001;
     const double gamma = 0.01;
     const double dt = 0.01;
-    const int num_steps = 100;
+    const int num_steps = 1000;
     double energy = 0.0;
 
     //Fuente externa
@@ -71,11 +71,13 @@ int main(int argc, char** argv) {
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
     double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
-        if(chunk_size > 0)
+        if(chunk_size > 0){
+            std::cout << "··············································";
             myNetwork.propagateWaves(schedule_type, chunk_size);
-        else
+        } else {
+            std::cout << "###############################";
             myNetwork.propagateWaves(schedule_type);
-
+        }
         propagation.calculateEnergy(1); //Usamos parallel reduction
 
         csv << step << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy();;
@@ -86,8 +88,12 @@ int main(int argc, char** argv) {
         csv << "\n";
 
         if (step % 25 == 0){
-                std::cout << "\nPaso " << step << "\nEnergía=" << propagation.GetEnergy() << "\n";
-
+                std::cout << "\n---------------- Paso: " << step << " ----------------" << "\nEnergía=" << propagation.GetEnergy() << "\n";
+                std::cout << " + La amplitud de los nodos es: ";
+                for (int i = 0; i < num_nodes; ++i){
+                    std::cout << myNetwork.getNode(i).getAmplitude() << " ";
+                }
+                std::cout << std::endl;
         }
         std::cout << myNetwork.getNode(step).getAmplitude() << " " << "paso:" << step; 
     }
