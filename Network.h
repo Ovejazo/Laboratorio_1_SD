@@ -34,7 +34,6 @@ public:
     //Funciones que piden en el enunciado
     void initializeRandomNetwork();
     void initializeRegularNetwork(int dimensions, int w = 0, int h = 0);
-    void propagateCore();
 
     //GETTERS
     int getSize() const { return network_size; }
@@ -42,7 +41,7 @@ public:
     double getDampingCoeff() const { return damping_coeff; } 
     std::vector<Node>& getNodes() {return nodes; }
     const std::vector<Node>& getNodes() const {return nodes; }
-    bool inInitialized() const {return initialized;}
+    bool isInitialized() const {return initialized;}
 
     int getAltoMalla() const {return alto_malla;}
     int getAnchoMalla() const {return ancho_malla;}

@@ -15,11 +15,6 @@ class WavePropagator {
         //Getter
         double GetEnergy();
 
-        // Function overloading para integracion con diferentes clausulas
-        void integrateEuler(); // Integracion basica
-        void integrateEuler(int sync_type); // atomic=0, critical=1, nowait=2
-        void integrateEuler(int sync_type, bool use_barrier);
-
         // Function overloading para calculo de energia
         void calculateEnergy(); // Calculo basico
         void calculateEnergy(int method); // reduce=0, atomic=1
