@@ -31,7 +31,7 @@ void Network::initializeRegularNetwork(int dimensions, int w, int h){
             if (i > 0) nodes[i].addNeighbor(i - 1);
             if (i < network_size - 1) nodes[i].addNeighbor(i + 1);
         }
-        std::cout << "Red lineal inicializada con " << network_size << " nodos." << std::endl;
+
     }else if (dimensions == 2){
         if(h*w != network_size){
             throw std::runtime_error("Dimensiones erroneas");

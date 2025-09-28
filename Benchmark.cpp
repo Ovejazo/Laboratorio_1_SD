@@ -16,7 +16,7 @@ static Estadisticas computeMeanStd(const std::vector<double>& v){
         }
         s2 /= static_cast<double>(v.size() - 1);
     }
-    return Estadisticas(m, sqrt(s2));
+    return Estadisticas(m, std::sqrt(s2));
 }
 
 std::vector<RunResults> Benchmark::runGrid(
