@@ -1,3 +1,4 @@
+#include <random>
 #include <string>
 #include <vector>
 #include <functional>
@@ -5,12 +6,12 @@
 class Estadisticas{
 public:
     Estadisticas() : media(0.0), stddev(0.0) {}
+    Estadisticas(double media, double stddev) : media(media), stddev(stddev) {}
 
-    double getMedia();
-    double getStddev();
-
-    void setMedia(double v);
-    void setStddev(double v);
+    double getMedia() const { return media; }
+    double getStddev() const { return stddev; }
+    void setMedia(double v) { media = v; }
+    void setStddev(double v) { stddev = v; }
 
 private:
     double media;
@@ -32,14 +33,16 @@ public:
           time(time), speedup(speedup), efficiency(efficiency),
           speedupErr(speedupErr), efficiencyErr(efficiencyErr) {}
     
-    int getThreads();
-    int getSchedule();
-    int getchunk();
-    double getSpeedup();
-    double getEfficiency();
-    double getEfficiencyErr();
-    const Estadisticas& getTime();
-    const Estadisticas& getSpeedupErr();
+    // Getters
+    int getThreads() const { return threads; }
+    int getSchedule() const { return schedule; }
+    int getChunk() const { return chunk; }
+    double getSpeedup() const { return speedup; }
+    double getEfficiency() const { return efficiency; }
+    double getEfficiencyErr() const { return efficiencyErr; }
+    const Estadisticas& getTime() const { return time; }
+    const Estadisticas& getSpeedupErr() const { return speedupErr; }
+
 
 private:
     int threads;
@@ -54,8 +57,7 @@ private:
 
 class Benchmark{
 public:
-    static std::vector<RunResults> runGri(
-        const std::vector<int>& schedule,
+    static std::vector<RunResults> runGrid(
         const std::vector<int>& schedules,
         const std::vector<int>& chunks,
         const std::vector<int>& threadsList,

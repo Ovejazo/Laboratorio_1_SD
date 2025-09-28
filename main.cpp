@@ -3,12 +3,72 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
+
 #include "WavePropagation.h"
+#include "Benchmark.h"
+#include "MetricsCalculator.h"
 
 #include <omp.h>
 
+//------------------------------ BENCHMARK --------------------------------------
+static double run_once_benchmark(int schedule, int chunk, int threads){
+    omp_set_num_threads(threads);
+
+    //DEfinimos los parametros
+    const int num_nodes = 5000;
+    const double D = 0.1;
+    const double gamma = 0.01;
+    const double dt  = 0.01;
+    const int num_steps = 200;
+
+    std::vector<double> sources (num_nodes, 0.0);
+
+    Network net(num_nodes, D, gamma);
+    net.initializeRegularNetwork(1);
+    net.setTimeStep(dt);
+    net.setSources(sources);
+    net.getNode(num_nodes/2).setAmplitude(1.0);
+
+    double t0 = omp_get_wtime();
+    for (int step = 0; step < num_steps; ++step){
+        if(chunk > 0)   net.propagateWaves(schedule, chunk);
+        else            net.propagateWaves(schedule);  
+    }
+    double t1 = omp_get_wtime();
+    return (t1 - t0);
+}
+
 //------------------------------ MAIN --------------------------------------
 int main(int argc, char** argv) {
+    if (argc >= 2 && std::string(argv[1]) == "-benchmark"){
+        std::vector<int> schedules = {0, 1, 2};      // static, dynamic, guided
+        std::vector<int> chunks    = {0, 64, 256};   // 0 => sin chunk explícito
+        std::vector<int> threads   = {1, 2, 4, 8};
+
+        std::vector<double> t1_samples;
+        for(int r = 0; r < 10; ++r){
+            t1_samples.push_back(run_once_benchmark(0, 0, 1));
+        }
+
+        double m = 0.0;
+        for(double x : t1_samples) m += x;
+        m /= t1_samples.size();
+        double s2 = 0.0;
+        for (double x : t1_samples){
+            double d = x - m;
+            s2 += d*d;
+        }
+        double s = (t1_samples.size() > 1) ? std::sqrt(s2/t1_samples.size()-1) : 0.0;
+
+        auto results = Benchmark::runGrid(
+            schedules, chunks, threads,
+            10,
+            run_once_benchmark,
+            m, s);
+        Benchmark::writeDat("Resultados_benchmark.dat", results);
+        std::cout << "Resultados de benchmark escritos";
+        return 0;
+    }
     std::cout << "Iniciando simulador de propagación de ondas (Versión Serial)" << std::endl;
     //Vamos a definir el schedule_type y el chunk_size como valores de entrada
     int schedule_type = 0;

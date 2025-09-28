@@ -1,4 +1,6 @@
 #include "Benchmark.h"
+#include <cmath>
+#include <fstream>
 
 static Estadisticas computeMeanStd(const std::vector<double>& v){
     if(v.empty()) return Estadisticas(0.0, 0.0);
@@ -14,6 +16,7 @@ static Estadisticas computeMeanStd(const std::vector<double>& v){
         }
         s2 /= static_cast<double>(v.size() - 1);
     }
+    return Estadisticas(m, sqrt(s2));
 }
 
 std::vector<RunResults> Benchmark::runGrid(
@@ -27,16 +30,16 @@ std::vector<RunResults> Benchmark::runGrid(
 
     //Declaramos la salida, que sera un vector de tipo "RunResults"
     std::vector<RunResults> out;
-    out.reserve(schedules.size() * chunk.size() * threadsList.size());
+    out.reserve(schedules.size() * chunks.size() * threadsList.size());
 
     //Vamos a hacer un for por cada "item" que tengamos
     for(int p : threadsList){
         for (int sch : schedules){
-            for (int ch : chunk){
+            for (int ch : chunks){
                 std::vector<double> times;
-                time.reserve(repetitions);
+                times.reserve(repetitions);
                 for(int r = 0; r < repetitions; ++r){
-                    time.push_back(runFn(sch, ch, p));
+                    times.push_back(runFn(sch, ch, p));
                 }
                 Estadisticas t = computeMeanStd(times);
 
@@ -51,16 +54,15 @@ std::vector<RunResults> Benchmark::runGrid(
                 out.emplace_back(
                     p, sch, ch,
                     t, Sp, Ep,
-                    Estadisticas(sigma_Sp, 0.0)
-                    sigma_Ep
-                );
+                    Estadisticas(sigma_Sp, 0.0),
+                    sigma_Ep);
             }
         }
     }
     return out;
 }
 
-void Benchmark::writeDat(const std::string& path, const std::vector<RunResult>& rows) {
+void Benchmark::writeDat(const std::string& path, const std::vector<RunResults>& rows) {
     std::ofstream f(path);
     f << "#threads schedule chunk time_mean time_std speedup efficiency sigma_Sp sigma_Ep\n";
     for (const auto& r : rows) {
@@ -75,14 +77,3 @@ void Benchmark::writeDat(const std::string& path, const std::vector<RunResult>& 
           << r.getEfficiencyErr() << "\n";
     }
 }
-
-//Getters
-int getThreads() {return threads;}
-int getSchedule() {return schedule;} 
-int getchunk() {return chunk;}
-double getSpeedup() {return speedup;}
-double getEfficiency() {return efficiency;}
-double getEfficiencyErr() {return efficiencyErr;}
-const Estadisticas& getTime() {return time;}
-const Estadisticas& getSpeedupErr() {return speedupErr;}
-
