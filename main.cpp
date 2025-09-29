@@ -13,6 +13,17 @@
 
 #include <omp.h>
 
+/* tipo de ejecuciones
+
+- 0 para static
+- 1 dynamic
+- 2 guided
+
+ejemplo:
+- ./wave_propagation 0
+- ./wave_propagation 1 4
+- ./wave_propagation 2 8
+*/
 //------------------------------ BENCHMARK --------------------------------------
 static double run_once_benchmark(int schedule, int chunk, int threads){
     omp_set_num_threads(threads);
@@ -117,6 +128,7 @@ int main(int argc, char** argv) {
         std::cout << "Resultados de benchmark escritos";
         return 0;
     }
+    double t0 = omp_get_wtime();
 
     //Vamos a definir el schedule_type y el chunk_size como valores de entrada
     int schedule_type = 0;
@@ -127,7 +139,7 @@ int main(int argc, char** argv) {
     if(argc >= 3) chunk_size = std::stoi(argv[2]);
 
     //Inicializamos los parametros con los que vamos a trabajar
-    const int num_nodes = 100;
+    const int num_nodes = 1000;
     const double D = 6;
     const double gamma = 0.01;
     const double dt = 0.01;
@@ -144,7 +156,7 @@ int main(int argc, char** argv) {
     Network myNetwork(num_nodes, D, gamma);
 
     //Creamos un red. 0 para 1D y 1 para 2D
-    myNetwork.initializeRegularNetwork(2, 10, 10);
+    myNetwork.initializeRegularNetwork(1);
     myNetwork.setTimeStep(dt);
     myNetwork.setSources(sources);
 
@@ -194,7 +206,6 @@ int main(int argc, char** argv) {
 
 
     // 4. BUCLE PRINCIPAL DE SIMULACIÓN
-    double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
         if (chunk_size > 0) {
             myNetwork.propagateWaves(schedule_type, chunk_size);

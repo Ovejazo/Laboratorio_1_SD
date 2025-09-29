@@ -66,7 +66,7 @@ void WavePropagator::calculateEnergy(int method, bool use_private){
             } 
         }else {
             #pragma omp parallel for reduction(+:energy)
-            for (int i = 0; i < nodes.size(); ++i) {
+            for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
                 double amp = nodes[i].getAmplitude();
                 energy += amp * amp;
             }
@@ -88,7 +88,7 @@ void WavePropagator::processNodes(){
 
     //Vamos a sumar la amplitud de los nodos
     double sum = 0.0;
-    for(int i = 0; i < nodes.size(); ++i){
+    for(int i = 0; i < static_cast<int>(nodes.size()); ++i){
         sum += nodes[i].getAmplitude();
     }
     std::cout << "La suma de las amplitudes es: " << sum << std::endl;
@@ -111,7 +111,7 @@ void WavePropagator::processNodes(int task_type){
             //Se aplica omp single
             #pragma omp single
             {
-                for (int i = 0; i < nodes.size(); ++i) {
+                for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
                     #pragma omp task shared(nodes, sum)
                     {
                         double local_sum = nodes[i].getAmplitude();
@@ -127,7 +127,7 @@ void WavePropagator::processNodes(int task_type){
         std::vector<Node>& nodes = network->getNodes();
         double sum = 0.0;
         #pragma omp parallel for reduction(+:sum)
-        for (int i = 0; i < nodes.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
             sum += nodes[i].getAmplitude();
         }
         std::cout << "Suma de amplitudes (parallel for): " << sum << std::endl;
@@ -147,7 +147,7 @@ void WavePropagator::processNodes(int task_type, bool use_single){
             {
                 #pragma omp single
                 {
-                    for(int i = 0; i < nodes.size(); ++i){
+                    for(int i = 0; i < static_cast<int>(nodes.size()); ++i){
                         #pragma omp task shared(nodes, sum)
                         {
                             double local_sum = nodes[i].getAmplitude();
@@ -160,7 +160,7 @@ void WavePropagator::processNodes(int task_type, bool use_single){
         } else{
             //Hacemos un parallel for con single solamente
             #pragma omp parallel for reduction(+:sum)
-            for(int i = 0; i < nodes.size(); ++i){
+            for(int i = 0; i < static_cast<int>(nodes.size()); ++i){
                 sum += nodes[i].getAmplitude();
             }
         }
@@ -178,7 +178,7 @@ void WavePropagator::simulatePhasesBarrier(){
     {
         //Vamos a hacer algún for
         #pragma omp for
-        for(int i = 0; i < nodes.size(); i++){
+        for(int i = 0; i < static_cast<int>(nodes.size()); i++){
             temp[i] = nodes[i].getAmplitude() * 2;
         }
 
@@ -187,7 +187,7 @@ void WavePropagator::simulatePhasesBarrier(){
 
         //Vamos a hacer el segundo for
         #pragma omp for
-        for(int i = 0; i < nodes.size(); i++){
+        for(int i = 0; i < static_cast<int>(nodes.size()); i++){
             nodes[i].setAmplitude(temp[i]);
         }
     }
@@ -216,8 +216,8 @@ void WavePropagator::calculateMetricsFirstprivate() {
     double offset = 10.0; // Ejemplo: cada hilo parte de este valor
 
     #pragma omp parallel for firstprivate(offset)
-    for (int i = 0; i < nodes.size(); ++i) {
-        double value = offset + nodes[i].getAmplitude();
+    for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
+        [[maybe_unused]] double value = offset + nodes[i].getAmplitude();
         // Puedes hacer lo que quieras con value, ej: imprimirlo
         // Aquí solo para demostrar el uso de firstprivate
         #pragma omp critical
@@ -232,7 +232,7 @@ void WavePropagator::calculateFinalStateLastprivate() {
     double last_amplitude = 0.0;
 
     #pragma omp parallel for lastprivate(last_amplitude)
-    for (int i = 0; i < nodes.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(nodes.size()); ++i) {
         last_amplitude = nodes[i].getAmplitude();
     }
     std::cout << "[lastprivate] Última amplitud procesada: " << last_amplitude << std::endl;

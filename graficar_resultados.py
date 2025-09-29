@@ -5,6 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+"""
+ejemplo para ejecutar el python
+- python3 graficar_resultados.py --mode 1d --input "wave evolution.dat" --output wave_1d.gif
+- python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "wave evolution.dat" --output wave_2d.gif
+"""
+
 def load_wave_evolution(path):
     """
     Lee 'wave evolution.dat' con formato:
