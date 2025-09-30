@@ -71,7 +71,7 @@ public:
     //Metodos obligatorios
     void propagateWaves();
     void propagateWaves(int schedule_type);
-    void propagateWaves(int schedule_type, int chunck_size);
+    void propagateWaves(int schedule_type, int chunk_size);
     void propagateWavesCollapse();
 
 private:

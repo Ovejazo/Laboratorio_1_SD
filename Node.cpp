@@ -26,6 +26,7 @@ void Node::addNeighbor(int neighbor_id) {
     neighbors.push_back(neighbor_id);
 }
 
+/*
 void Node::removeNeighbor(int neighbor_id) {
     // Buscar el vecino y eliminarlo si existe
     auto it = std::find(neighbors.begin(), neighbors.end(), neighbor_id);
@@ -33,6 +34,7 @@ void Node::removeNeighbor(int neighbor_id) {
         neighbors.erase(it);
     }
 }
+*/
 
 bool Node::isNeighbor(int node_id) const {
     return std::find(neighbors.begin(), neighbors.end(), node_id) != neighbors.end();

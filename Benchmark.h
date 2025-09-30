@@ -66,4 +66,10 @@ public:
         double t1_promedio, double t1_std);
     
     static void writeDat(const std::string& path, const std::vector<RunResults>& rows);
+
+    static double run_once_benchmark(int schedule, int chunk, int threads);
+
+    static void writeScalingAnalysis(const std::vector<RunResults>& rows,
+                                    double t1_mean, double t1_std,
+                                    const std::string& path);
 };
