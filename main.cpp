@@ -128,7 +128,6 @@ int main(int argc, char** argv) {
         std::cout << "Resultados de benchmark escritos";
         return 0;
     }
-    double t0 = omp_get_wtime();
 
     //Vamos a definir el schedule_type y el chunk_size como valores de entrada
     int schedule_type = 0;
@@ -139,7 +138,7 @@ int main(int argc, char** argv) {
     if(argc >= 3) chunk_size = std::stoi(argv[2]);
 
     //Inicializamos los parametros con los que vamos a trabajar
-    const int num_nodes = 1000;
+    const int num_nodes = 100;
     const double D = 6;
     const double gamma = 0.01;
     const double dt = 0.01;
@@ -179,22 +178,26 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // 2. ESCRIBIR CABECERA (Time_Step + Node_0, Node_1, ..., Node_9)
+// 2. ESCRIBIR CABECERA (Time_Step + Node_0, Node_1, ..., Node_N-1)
     csv << "Time_Step,energy,avg_amp";
-    wave_dat << "# Time_step";
+    wave_dat << "# Time_Step";
     for (int i = 0; i < num_nodes; ++i) {
         csv << ",Node_" << i;
-        wave_dat << "Node_" << i;
+        wave_dat << " Node_" << i; // <-- espacio antes de Node_
     }
-        csv << "\n";
-        wave_dat << "\n";
-        energy_dat << "# Time_step energy\n";
+    csv << "\n";
+    wave_dat << "\n";
+    energy_dat << "# Time_Step energy\n";
 
-    // 3. ESCRIBIR ESTADO INICIAL (Paso 0)
+    // 3. ESTADO INICIAL
     propagation.calculateEnergy(0);
     std::vector<double> initial_amplitudes = myNetwork.getCurrentAmplitudes();
-    
-    csv << 0 << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy();
+    double avg0 = 0.0;
+    for (double v : initial_amplitudes) avg0 += v;
+    avg0 /= initial_amplitudes.size();
+
+    csv << 0 << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy()
+        << "," << std::scientific << std::setprecision(6) << avg0;
     wave_dat << 0;
     for (double amp : initial_amplitudes) {
         csv << "," << std::scientific << std::setprecision(6) << amp;
@@ -204,8 +207,8 @@ int main(int argc, char** argv) {
     wave_dat << "\n";
     energy_dat << 0 << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";
 
-
-    // 4. BUCLE PRINCIPAL DE SIMULACIÓN
+    // 4. BUCLE PRINCIPAL
+    double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
         if (chunk_size > 0) {
             myNetwork.propagateWaves(schedule_type, chunk_size);
@@ -216,8 +219,14 @@ int main(int argc, char** argv) {
 
         std::vector<double> current_amplitudes = myNetwork.getCurrentAmplitudes();
 
+        // promedio de amplitudes
+        double avg = 0.0;
+        for (double v : current_amplitudes) avg += v;
+        avg /= current_amplitudes.size();
+
         // Escribir CSV + DAT (ondas y energía)
-        csv << step << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy();
+        csv << step << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy()
+            << "," << std::scientific << std::setprecision(6) << avg;
         wave_dat << step;
         for (double amp : current_amplitudes) {
             csv << "," << std::scientific << std::setprecision(6) << amp;
@@ -226,18 +235,6 @@ int main(int argc, char** argv) {
         csv << "\n";
         wave_dat << "\n";
         energy_dat << step << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";
-
-        /*
-        if (step % 25 == 0) {
-            std::cout << "\n-- Paso: " << step << " --"
-                      << "\nEnergía=" << propagation.GetEnergy() << "\n";
-            std::cout << "[ ";
-            for (int i = 0; i < num_nodes; ++i){
-                std::cout << myNetwork.getNode(i).getAmplitude() << " ";
-            }
-            std::cout << " ]";
-        }
-        */
     }
 
     // 5. CERRAR ARCHIVO
