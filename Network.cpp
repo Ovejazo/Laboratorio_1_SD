@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <vector>
 
-
 #include "Network.h"
 
 //Funciones de network

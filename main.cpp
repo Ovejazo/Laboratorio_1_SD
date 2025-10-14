@@ -89,8 +89,8 @@ int main(int argc, char** argv) {
     //Se crea una red que se llamara "my_network"
     Network myNetwork(num_nodes, D, gamma);
 
-    //Creamos un red. 0 para 1D y 1 para 2D
-    myNetwork.initializeRegularNetwork(1);
+    //Creamos un red. 1 para 1D y 2 para 2D
+    myNetwork.initializeRegularNetwork(2, 10, 10);
     myNetwork.setTimeStep(dt);
     myNetwork.setSources(sources);
 

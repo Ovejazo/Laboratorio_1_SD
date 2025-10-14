@@ -25,7 +25,7 @@ double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
     omp_set_num_threads(threads);
 
     //DEfinimos los parametros
-    const int num_nodes = 5000;
+    const int num_nodes = 10000;
     const double D = 0.1;
     const double gamma = 0.01;
     const double dt  = 0.01;
@@ -34,7 +34,7 @@ double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
     std::vector<double> sources (num_nodes, 0.0);
 
     Network net(num_nodes, D, gamma);
-    net.initializeRegularNetwork(1);
+    net.initializeRegularNetwork(2, 100, 100);
     net.setTimeStep(dt);
     net.setSources(sources);
     net.getNode(num_nodes/2).setAmplitude(1.0);
