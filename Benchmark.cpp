@@ -1,8 +1,11 @@
-#include "Benchmark.h"
-#include "Network.h"
 #include <cmath>
 #include <fstream>
 #include <omp.h>
+#include <filesystem> 
+
+#include "Benchmark.h"
+#include "Network.h"
+
 
 static Estadisticas computeMeanStd(const std::vector<double>& v){
     if(v.empty()) return Estadisticas(0.0, 0.0);

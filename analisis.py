@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -40,11 +41,24 @@ def fit_amdahl(p_vals, Sp_vals):
         err[i] = np.mean((Sp - pred)**2)
     return f_grid[np.argmin(err)]
 
+def parse_args():
+    p = argparse.ArgumentParser(description="Analiza benchmark y genera gráficos de performance")
+    p.add_argument("--infile", default=os.path.join("datos", "benchmark results.dat"),
+                   help="Ruta al archivo de benchmark (.dat). Por defecto: datos/benchmark results.dat")
+    p.add_argument("--outdir", default="datos",
+                   help="Directorio de salida para gráficos. Por defecto: datos")
+    p.add_argument("--outfile", default="performance plots.png",
+                   help="Nombre del PNG de salida. Por defecto: 'performance plots.png'")
+    return p.parse_args()
+
 def main():
-    bench_path = "benchmark results.dat"
+    args = parse_args()
+
+    bench_path = args.infile
     if not os.path.isfile(bench_path):
         print(f"[ERROR] No se encontró '{bench_path}'. Ejecuta primero el benchmark.")
         return
+
     b = load_bench(bench_path)
 
     fig, axes = plt.subplots(1, 3, figsize=(18,5))
@@ -123,8 +137,12 @@ def main():
     ax.grid(True, ls='--', alpha=0.3); ax.legend()
 
     plt.tight_layout()
-    plt.savefig("performance plots.png", dpi=150)
-    print("OK: performance plots.png generado.")
+
+    # Asegurar carpeta de salida y guardar
+    os.makedirs(args.outdir, exist_ok=True)
+    out_path = os.path.join(args.outdir, args.outfile)
+    plt.savefig(out_path, dpi=150)
+    print(f"OK: gráfico guardado en '{out_path}'.")
 
 if __name__ == "__main__":
     main()

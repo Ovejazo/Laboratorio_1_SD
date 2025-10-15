@@ -149,4 +149,54 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
     }
 }
 
+void Network::propagateWavesCollapse(){
+
+    if(!initialized){
+        std::cerr << "Se inicializo la red antes de ejectura\n";
+    }
+    if (time_step <= 0.0) {
+        std::cerr << "Los pasos no han sido configurados\n";
+        time_step = 0.01;
+    }
+    if (ancho_malla <= 0 || alto_malla <= 0 || ancho_malla * alto_malla != network_size) {
+        std::cerr << "[propagateWavesCollapse] La red no fue inicializada en 2D correctamente.\n";
+        return;
+    }
+
+    const int W = ancho_malla;
+    const int H = alto_malla;
+    const double D = diffusion_coeff;
+    const double gamma = damping_coeff;
+
+    // buffer temporal local (puedes cambiar a scratch_amplitudes si quieres evitar alocación)
+    std::vector<double> new_amplitude(network_size, 0.0);
+
+    auto idx = [&](int r, int c){ return r*W + c; };
+
+    //Aquí hacemos el collapse
+    #pragma omp parallel for collapse(2) schedule(static)
+    for (int r = 0; r < H; ++r) {
+        for (int c = 0; c < W; ++c) {
+            int i = idx(r, c);
+            const Node& node = nodes[i];
+            double A = node.getAmplitude();
+            double sum_diff = 0.0;
+            // Usamos la lista de vecinos ya construida
+            for (int nb : node.getNeighbors()){
+                sum_diff += (nodes[nb].getAmplitude() - A);
+            }
+            double source_term = (i < (int)sources.size()) ? sources[i] : 0.0;
+            double delta = time_step * (D * sum_diff - gamma * A + source_term);
+            new_amplitude[i] = A + delta;
+        }
+    }
+
+    // Fase de escritura (separada)
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < network_size; ++i){
+        nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
+        nodes[i].setAmplitude(new_amplitude[i]);
+    }
+}
+
 Node& Network::getNode(int i){ return this->nodes[i]; }

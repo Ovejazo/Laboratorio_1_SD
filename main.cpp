@@ -6,6 +6,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <filesystem>
 
 #include "WavePropagation.h"
 #include "Benchmark.h"
@@ -24,11 +25,8 @@ ejemplo:
 - ./wave_propagation 1 4
 - ./wave_propagation 2 8
 */
-//------------------------------ BENCHMARK --------------------------------------
 
 // Escribe scaling analysis.dat tomando, para cada p, el mejor tiempo (mínimo) entre todas las combinaciones.
-
-
 
 //------------------------------ MAIN --------------------------------------
 int main(int argc, char** argv) {
@@ -36,6 +34,9 @@ int main(int argc, char** argv) {
         std::vector<int> schedules = {0, 1, 2};      // static, dynamic, guided
         std::vector<int> chunks    = {0, 64, 256};   // 0 => sin chunk explícito
         std::vector<int> threads   = {1, 2, 4, 8};
+
+        //Creamos el directorio donde se guardara la información
+        std::filesystem::create_directories("datos");
 
         std::vector<double> t1_samples;
         for(int r = 0; r < 10; ++r){
@@ -58,8 +59,8 @@ int main(int argc, char** argv) {
             Benchmark::run_once_benchmark,
             m, s);
 
-        Benchmark::writeDat("benchmark results.dat", results);
-        Benchmark::writeScalingAnalysis(results, m, s, "scaling analysis.dat");
+        Benchmark::writeDat("datos/benchmark results.dat", results);
+        Benchmark::writeScalingAnalysis(results, m, s, "datos/scaling analysis.dat");
         std::cout << "Resultados de benchmark escritos";
         return 0;
     }
@@ -67,10 +68,14 @@ int main(int argc, char** argv) {
     //Vamos a definir el schedule_type y el chunk_size como valores de entrada
     int schedule_type = 0;
     int chunk_size = 0;
+    bool use_collapse = false;
 
     //Conseguimos valores dependiendo del valor de argc
     if(argc >= 2) schedule_type = std::stoi(argv[1]);
     if(argc >= 3) chunk_size = std::stoi(argv[2]);
+
+    //Si se quiere hacer un red 2D se puede agregar la flag -collapse
+    if(argc >= 4 && std::string(argv[3]) == "-collapse") use_collapse = true;
 
     //Inicializamos los parametros con los que vamos a trabajar
     const int num_nodes = 100;
@@ -100,14 +105,17 @@ int main(int argc, char** argv) {
     //Creamos el objeto WavePropagator
     WavePropagator propagation(&myNetwork, dt, sources, energy);
 
+    //Creamos el directorio para guardar los datos en el mismo lugar
+    std::filesystem::create_directories("datos");
+
     // 1. ABRIR ARCHIVO CSV PARA ESCRITURA (EVOLUCIÓN COMPLETA)
     std::ofstream csv("results.csv");
     if (!csv.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo results.csv" << std::endl;
         return 1;
     }
-    std::ofstream wave_dat("wave evolution.dat");
-    std::ofstream energy_dat("energy conservation.dat");
+    std::ofstream wave_dat("datos/wave evolution.dat");
+    std::ofstream energy_dat("datos/energy conservation.dat");
     if(!wave_dat.is_open() || !energy_dat.is_open()){
         std::cerr << "Error: No se pudo abrir wave evolution o energy conservation";
         return 1;
@@ -145,11 +153,16 @@ int main(int argc, char** argv) {
     // 4. BUCLE PRINCIPAL
     double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
-        if (chunk_size > 0) {
-            myNetwork.propagateWaves(schedule_type, chunk_size);
-        } else {
-            myNetwork.propagateWaves(schedule_type);
+
+        if(use_collapse){
+            
+            //Va a entrar aquí unicamente si la red es 2D
+            myNetwork.propagateWavesCollapse();
+        }else{
+            if (chunk_size > 0) myNetwork.propagateWaves(schedule_type, chunk_size);
+                else myNetwork.propagateWaves(schedule_type);
         }
+
         propagation.calculateEnergy(1); // reduction
 
         std::vector<double> current_amplitudes = myNetwork.getCurrentAmplitudes();
