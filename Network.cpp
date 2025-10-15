@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <cmath>
 
 #include "Network.h"
 
@@ -13,12 +14,18 @@ Network::Network(int size, double diff_coeff, double damp_coeff)
         damping_coeff(damp_coeff),
         ancho_malla(0),
         alto_malla(0),
-        initialized(false)
+        initialized(false),
+        time_step(0.0),
+        current_time(0.0),
+        source_mode(SourceMode::Fixed),
+        source_amplitude(0.0),
+        source_omega(0.0)
 {
         nodes.reserve(network_size);
         for(int i = 0; i < network_size; ++i){
             nodes.emplace_back(i, 0.0);
         }
+        sources.assign(network_size, 0.0);
         scratch_amplitudes.assign(network_size, 0.0);
 }
 
@@ -56,7 +63,54 @@ void Network::initializeRegularNetwork(int dimensions, int w, int h){
     }
 
     initialized = true;
+    current_time = 0.0;
     scratch_amplitudes.assign(network_size, 0.0);
+}
+
+void Network::setSources(const std::vector<double>& src){
+    sources = src;
+    if ((int)sources.size() != network_size){
+        sources.resize(network_size, 0.0);
+    }
+    source_mode = SourceMode::Fixed;
+}
+
+void Network::setZeroSource(){
+    sources.assign(network_size, 0.0);
+    source_mode = SourceMode::Zero;
+}
+
+void Network::generateRandomSources(double min_value, double max_value, unsigned int seed){
+    std::mt19937 rng(seed);
+    std::uniform_real_distribution<double> dist(min_value, max_value);
+    sources.resize(network_size);
+
+    for(int i = 0; i < network_size; ++i){
+        sources[i] = dist(rng);
+    }
+
+    source_mode = SourceMode::Random;
+}
+
+void Network::setSineSource(double amplitude, double omega){
+    source_amplitude = amplitude;
+    source_omega = omega;
+    source_mode = SourceMode::Sine_uniform;
+}
+
+inline double Network::evalSourceTerm(int i, double t) const {
+    switch (source_mode) {
+        case SourceMode::Zero:
+            return 0.0;
+        case SourceMode::Fixed:
+            return (i < (int)sources.size()) ? sources[i] : 0.0;
+        case SourceMode::Random:
+            return (i < (int)sources.size()) ? sources[i] : 0.0;
+        case SourceMode::Sine_uniform:
+            return source_amplitude * std::sin(source_omega * t);
+        default:
+            return 0.0;
+    }
 }
 
 void Network::propagateWaves(){
@@ -85,7 +139,10 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
     const int N = network_size;
     const double D = diffusion_coeff;
     const double gamma = damping_coeff;
+
     std::vector<double> new_amplitude(N, 0.0);
+
+    const double t_now = current_time;
 
     //Aquí esta el loop principal el cual calcular nuevas amplitudes.
     auto computeBody = [&](int i){ 
@@ -95,7 +152,7 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
         for(int nb : node.getNeighbors()){
             sum_diff += (nodes[nb].getAmplitude() - A);
         }
-        double source_term = (i < (int)sources.size()) ? sources[i] : 0.0;
+        double source_term = evalSourceTerm(i, t_now);
         double delta = time_step * (D * sum_diff - gamma * A + source_term);
         new_amplitude[i] = A + delta;
     };
@@ -147,6 +204,8 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
         nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
         nodes[i].setAmplitude(new_amplitude[i]);
     }
+
+    current_time += time_step;
 }
 
 void Network::propagateWavesCollapse(){

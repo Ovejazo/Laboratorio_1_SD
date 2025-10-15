@@ -7,6 +7,14 @@
 
 
 class Network {
+public: 
+    enum class SourceMode{
+        Zero = 0,
+        Fixed = 1,
+        Random = 2,
+        Sine_uniform = 3
+    };
+
 private:
     std::vector<Node> nodes;
     int network_size;
@@ -19,7 +27,13 @@ private:
 
     std::vector<double> sources;
     double time_step = 0.0;
+    double current_time = 0.0;
     //string tipo_network;
+
+    //Configuración de fuente
+    SourceMode source_mode = SourceMode::Fixed;
+    double source_amplitude = 0.0;
+    double source_omega = 0.0;
 
     std::vector<double> scratch_amplitudes;
 
@@ -52,11 +66,18 @@ public:
         for(auto& n : nodes) out.push_back(n.getAmplitude());
         return out;
     };
+
+    double getCurrentTime() const {return current_time;}
+    SourceMode getSourceMode() const {return source_mode;}
     //std::string getNetworkType() const;
 
     //SETTERS
     void setTimeStep(double dt) {time_step = dt;}
     void setSources(const std::vector<double>& src) { sources = src;}
+    void setZeroSource();
+    void generateRandomSources(double min_value, double max_value, unsigned int seed = 5489u);
+    void setSineSource(double amplitude, double omega); // S(t)=A sin(ωt)
+    void setSourceMode(SourceMode mode) { source_mode = mode; }
     //void setDimensionesDeMalla(int ancho, int alto);
     //void setNetworkType(const std::string& type);
 
@@ -76,6 +97,7 @@ public:
 
 private:
     void propagateCore(int schedule_type, int chunk_size, bool use_chunk);
+    inline double evalSourceTerm(int i, double t) const;
 };
 
 #endif
