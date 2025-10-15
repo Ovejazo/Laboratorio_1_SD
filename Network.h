@@ -22,8 +22,10 @@ private:
     double damping_coeff;
 
     //En caso de que sea una network 2D
-    int ancho_malla = 0.0;
-    int alto_malla = 0.0;
+    int ancho_malla = 0;
+    int alto_malla = 0;
+
+    bool initialized = false;
 
     std::vector<double> sources;
     double time_step = 0.0;
@@ -37,7 +39,7 @@ private:
 
     std::vector<double> scratch_amplitudes;
 
-    bool initialized = false;
+
 
 public:
 
@@ -73,7 +75,7 @@ public:
 
     //SETTERS
     void setTimeStep(double dt) {time_step = dt;}
-    void setSources(const std::vector<double>& src) { sources = src;}
+    void setSources(const std::vector<double>& src);
     void setZeroSource();
     void generateRandomSources(double min_value, double max_value, unsigned int seed = 5489u);
     void setSineSource(double amplitude, double omega); // S(t)=A sin(ωt)

@@ -97,7 +97,39 @@ int main(int argc, char** argv) {
     //Creamos un red. 1 para 1D y 2 para 2D
     myNetwork.initializeRegularNetwork(2, 10, 10);
     myNetwork.setTimeStep(dt);
-    myNetwork.setSources(sources);
+    //myNetwork.setSources(sources);
+
+    enum class SourcePreset { Zero, Fixed, Random, Sine };
+
+    //constexpr SourcePreset kSource = SourcePreset::Zero;
+    constexpr SourcePreset kSource = SourcePreset::Fixed;
+    //constexpr SourcePreset kSource = SourcePreset::Random;
+    //constexpr SourcePreset kSource = SourcePreset::Sine;
+
+    constexpr double kFixedValue = 0.05;           // Fixed
+    constexpr double kRandMin = -0.05;             // Random
+    constexpr double kRandMax =  0.05;
+    constexpr unsigned kSeed   = 1234;
+    constexpr double kAmp   = 0.1;                 // Sine
+    constexpr double kOmega = 2.0 * M_PI * 1.0;    // ω = 2πf (f=1 Hz)
+
+    // Aplica la configuración elegida
+    switch (kSource) {
+        case SourcePreset::Zero:
+            myNetwork.setZeroSource();
+            break;
+        case SourcePreset::Fixed: {
+            std::vector<double> s(num_nodes, kFixedValue);
+            myNetwork.setSources(s);
+            break;
+        }
+        case SourcePreset::Random:
+            myNetwork.generateRandomSources(kRandMin, kRandMax, kSeed);
+            break;
+        case SourcePreset::Sine:
+            myNetwork.setSineSource(kAmp, kOmega);
+            break;
+    }
 
     //Vamos a definir la pertubación inicial para que la señal se mueva
     myNetwork.getNode(num_nodes/2).setAmplitude(1.0);

@@ -227,12 +227,10 @@ void Network::propagateWavesCollapse(){
     const double D = diffusion_coeff;
     const double gamma = damping_coeff;
 
-    // buffer temporal local (puedes cambiar a scratch_amplitudes si quieres evitar alocación)
     std::vector<double> new_amplitude(network_size, 0.0);
-
     auto idx = [&](int r, int c){ return r*W + c; };
+    const double t_now = current_time;
 
-    //Aquí hacemos el collapse
     #pragma omp parallel for collapse(2) schedule(static)
     for (int r = 0; r < H; ++r) {
         for (int c = 0; c < W; ++c) {
@@ -240,22 +238,22 @@ void Network::propagateWavesCollapse(){
             const Node& node = nodes[i];
             double A = node.getAmplitude();
             double sum_diff = 0.0;
-            // Usamos la lista de vecinos ya construida
             for (int nb : node.getNeighbors()){
                 sum_diff += (nodes[nb].getAmplitude() - A);
             }
-            double source_term = (i < (int)sources.size()) ? sources[i] : 0.0;
+            double source_term = evalSourceTerm(i, t_now);
             double delta = time_step * (D * sum_diff - gamma * A + source_term);
             new_amplitude[i] = A + delta;
         }
     }
 
-    // Fase de escritura (separada)
     #pragma omp parallel for schedule(static)
     for (int i = 0; i < network_size; ++i){
         nodes[i].setPreviousAmplitude(nodes[i].getAmplitude());
         nodes[i].setAmplitude(new_amplitude[i]);
     }
+
+    current_time += time_step;
 }
 
 Node& Network::getNode(int i){ return this->nodes[i]; }
