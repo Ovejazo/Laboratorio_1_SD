@@ -84,7 +84,6 @@ Ejemplos:
 # 2D con collapse(2) (si la malla es 2D en el main)
 ./wave_propagation 2 8 -collapse
 ```
-
     3.5 En el main se puede cambiar el tipo de fuente externa que se quiere usar, hay 4 fuentes distintas a usar: 
         - "constexpr SourcePreset kSource = SourcePreset::Zero;"
         - "constexpr SourcePreset kSource = SourcePreset::Fixed;"
@@ -98,9 +97,54 @@ Ejemplos:
     - python3 graficar_resultados.py --mode 1d --input "wave evolution.dat" --output wave_1d.gif
     - python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "wave evolution.dat" --output wave_2d.gif
 
+Ejemplos:
+```bash
+# 1D (guarda datos/wave_1d.gif)
+python3 graficar_resultados.py --mode 1d --outdir datos
+
+# 2D (ancho x alto deben coincidir con la malla usada en C++)
+python3 graficar_resultados.py --mode 2d --width 10 --height 10 --outdir datos
+
+# Usando un archivo específico
+python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "datos/wave evolution.dat" --outdir datos --output onda_2d.gif
+```
+
 6. Con los resultados obtenidos de benchmark con el paso número 5, podemos graficar eso con el codigo de python llamado analisis.py, simplemente ejecutamos:
     - python3 analisis.py
 
 
+## Consideraciones
 
-python3 graficar_resultados.py --mode 1d --input "wave evolution.dat" --output wave_1d.gif
+- Los resultados obtenidos se guardan en la carpeta llamada datos, aquí se guardan los archivos .dat y los graficos que se crean en la ejecución de los codigos de python.
+
+Cuando se define el tipo de fuente externa, tenemos lo siguiente. 
+- Zero: S_i(t) = 0 para todos los nodos
+- Fixed: S_i(t) = kFixedValue para todos los nodos (o vector fijo si prefieres)
+- Random: S_i(t) = valor aleatorio fijo distinto por nodo (en [kRandMin, kRandMax])
+- Sine: S_i(t) = kAmp · sin(kOmega · t) (igual para todos los nodos)
+
+El tiempo `t` avanza automaticamente por cada paso.
+
+## Solución a errores comunes:
+- FileNotFoundError: asegúrate de que el archivo exista en `datos/` y que `--width * --height == N` (número de nodos).
+
+## Benchmarks de performance
+El modo benchmark explora combinaciones de `schedule × chunk × threads`, promedia 10 repeticiones y calcula speedup, eficiencia y barras de error.
+
+Ejecutar:
+```bash
+./wave_propagation -benchmark
+```
+
+Salida en `datos/`:
+- `benchmark results.dat` — tabla completa del grid
+- `scaling analysis.dat` — mejor combinación por número de threads
+
+Gráficas de performance:
+```bash
+# Genera datos/performance plots.png
+python3 analisis.py
+
+# Personalizar (si lo deseas)
+python3 analisis.py --infile "datos/benchmark results.dat" --outdir datos --outfile "performance plots.png"
+```
