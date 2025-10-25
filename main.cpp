@@ -15,21 +15,6 @@
 
 #include <omp.h>
 
-/* tipo de ejecuciones
-
-- 0 para static
-- 1 dynamic
-- 2 guided
-
-ejemplo:
-- ./wave_propagation 0
-- ./wave_propagation 1 4
-- ./wave_propagation 2 8
-*/
-
-// Escribe scaling analysis.dat tomando, para cada p, el mejor tiempo (mínimo) entre todas las combinaciones.
-
-//------------------------------ MAIN --------------------------------------
 int main(int argc, char** argv) {
     if (argc >= 2 && std::string(argv[1]) == "-benchmark"){
         return Benchmark::runBenchmark();
@@ -74,20 +59,23 @@ int main(int argc, char** argv) {
     std::vector<double> dummy_sources;
     WavePropagator propagation(&myNetwork, dt, dummy_sources, energy);
 
-    //Creamos el directorio para guardar los datos en el mismo lugar
+    
+    //1. Creamos las carpetas necesarias y abrimos los archivos de salida
     FileManagement::crearCarpeta();
     std::ofstream csv, wave_dat, energy_dat;
     if(!FileManagement::openOutFiles(csv, wave_dat, energy_dat)){
         return 1;
     }
 
-    // 2. ESCRIBIR CABECERA (Time_Step + Node_0, Node_1, ..., Node_N-1)
+    
+    //2. Escribimos la cabecera de los archivos
     FileManagement::writeHeader(csv, wave_dat, energy_dat, num_nodes);
 
-    // 3. ESTADO INICIAL
+
+    //3. Se escriben los estados iniciales
     FileManagement::writeInitialState(myNetwork, propagation, csv, wave_dat, energy_dat);
 
-    // 4. BUCLE PRINCIPAL
+    //4. Loop principal de la simulación
     double t0 = omp_get_wtime();
     for (int step = 1; step <= num_steps; ++step) {
 
@@ -123,12 +111,13 @@ int main(int argc, char** argv) {
         energy_dat << step << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";
     }
 
-    // 5. CERRAR ARCHIVO
+    //5. Cerramos los archivos y finalizamos la simulación
     double t1 = omp_get_wtime();
     const double duracion = t1 - t0;
 
     FileManagement::finalizeSimulation(duracion, csv);
     
+    //Funciones de prueba de clausulas OpenMP
     propagation.parallelInitializationSingle();
     propagation.calculateMetricsFirstprivate();
     propagation.calculateFinalStateLastprivate();
