@@ -10,11 +10,68 @@
 #include "WavePropagation.h"
 #include "FileManagement.h"
 
-void crearCarpeta() {
+void FileManagement::crearCarpeta() {
     std::filesystem::create_directories("datos");
 }
 
-void configureExternalSource(Network& myNetwork, int num_nodes) {
+bool FileManagement::openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat){
+    csv.open("results.csv");
+    wave_dat.open("datos/wave evolution.dat");
+    energy_dat.open("datos/energy conservation.dat");
+
+    if(!wave_dat.is_open() || !energy_dat.is_open() || !csv.is_open()){
+        std::cerr << "Error: No se pudo abrir wave evolution o energy conservation";
+        return 1;
+    }
+    return true;
+}
+
+void FileManagement::writeHeader(std::ofstream& csv,
+                         std::ofstream& wave_dat,
+                         std::ofstream& energy_dat,
+                         int num_nodes){
+    csv << "Time_Step,energy,avg_amp";
+    wave_dat << "# Time_Step";
+    for (int i = 0; i < num_nodes; ++i) {
+        csv << ",Node_" << i;
+        wave_dat << " Node_" << i; // <-- espacio antes de Node_
+    }
+    csv << "\n";
+    wave_dat << "\n";
+    energy_dat << "# Time_Step energy\n";
+}
+
+void FileManagement::writeInitialState(Network& myNetwork,
+                              WavePropagator& propagation,
+                              std::ofstream& csv,
+                              std::ofstream& wave_dat,
+                              std::ofstream& energy_dat){
+    propagation.calculateEnergy(0);
+    std::vector<double> initial_amplitudes = myNetwork.getCurrentAmplitudes();
+
+    double avg0 = 0.0;
+    for (double v : initial_amplitudes) avg0 += v;
+    if(!initial_amplitudes.empty()) avg0 /= static_cast<double>(initial_amplitudes.size());
+
+    csv << 0 << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy()
+        << "," << std::scientific << std::setprecision(6) << avg0;
+    wave_dat << 0;
+    for (double amp : initial_amplitudes) {
+        csv << "," << std::scientific << std::setprecision(6) << amp;
+        wave_dat << " " << std::scientific << std::setprecision(6) << amp;
+    }
+    csv << "\n";
+    wave_dat << "\n";
+    energy_dat << 0 << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";        
+}
+
+void FileManagement::finalizeSimulation(double duracion, std::ofstream& csv){
+    std::cout << "Tiempo total: " << duracion << "s\n";
+    csv.close();
+    std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
+}
+
+void FileManagement::configureExternalSource(Network& myNetwork, int num_nodes) {
 
     enum class SourcePreset { Zero, Fixed, Random, Sine };
 
@@ -47,61 +104,4 @@ void configureExternalSource(Network& myNetwork, int num_nodes) {
             myNetwork.setSineSource(kAmp, kOmega);
             break;
     }
-}
-
-bool openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat){
-    csv.open("results.csv");
-    wave_dat.open("datos/wave evolution.dat");
-    energy_dat.open("datos/energy conservation.dat");
-
-    if(!wave_dat.is_open() || !energy_dat.is_open() || !csv.is_open()){
-        std::cerr << "Error: No se pudo abrir wave evolution o energy conservation";
-        return 1;
-    }
-    return true;
-}
-
-void writeHeader(std::ofstream& csv,
-                         std::ofstream& wave_dat,
-                         std::ofstream& energy_dat,
-                         int num_nodes){
-    csv << "Time_Step,energy,avg_amp";
-    wave_dat << "# Time_Step";
-    for (int i = 0; i < num_nodes; ++i) {
-        csv << ",Node_" << i;
-        wave_dat << " Node_" << i; // <-- espacio antes de Node_
-    }
-    csv << "\n";
-    wave_dat << "\n";
-    energy_dat << "# Time_Step energy\n";
-}
-
-void writeInitialState(Network& myNetwork,
-                              WavePropagator& propagation,
-                              std::ofstream& csv,
-                              std::ofstream& wave_dat,
-                              std::ofstream& energy_dat){
-    propagation.calculateEnergy(0);
-    std::vector<double> initial_amplitudes = myNetwork.getCurrentAmplitudes();
-
-    double avg0 = 0.0;
-    for (double v : initial_amplitudes) avg0 += v;
-    if(!initial_amplitudes.empty()) avg0 /= static_cast<double>(initial_amplitudes.size());
-
-    csv << 0 << "," << std::scientific << std::setprecision(6) << propagation.GetEnergy()
-        << "," << std::scientific << std::setprecision(6) << avg0;
-    wave_dat << 0;
-    for (double amp : initial_amplitudes) {
-        csv << "," << std::scientific << std::setprecision(6) << amp;
-        wave_dat << " " << std::scientific << std::setprecision(6) << amp;
-    }
-    csv << "\n";
-    wave_dat << "\n";
-    energy_dat << 0 << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";        
-}
-
-void finalizeSimulation(double duracion, std::ofstream& csv){
-    std::cout << "Tiempo total: " << duracion << "s\n";
-    csv.close();
-    std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
 }

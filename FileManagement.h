@@ -11,8 +11,8 @@ class FileManagement {
 public:
 
     static void crearCarpeta();
-    static void configureExternalSource(Network& myNetwork, int num_nodes);
     static bool openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat);
+
     static void writeHeader(std::ofstream& csv,
                             std::ofstream& wave_dat,
                             std::ofstream& energy_dat,
@@ -25,6 +25,8 @@ public:
                                     std::ofstream& energy_dat);
 
     static void finalizeSimulation(double duracion, std::ofstream& csv);
+
+    static void configureExternalSource(Network& myNetwork, int num_nodes);
 };
 
 #endif

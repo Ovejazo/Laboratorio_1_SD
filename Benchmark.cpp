@@ -151,7 +151,7 @@ void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
     }
 }
 
-static int runBenchmark(){
+int Benchmark::runBenchmark(){
     std::vector<int> schedules = {0, 1, 2};      // static, dynamic, guided
     std::vector<int> chunks    = {0, 64, 256};   // 0 => sin chunk explícito
     std::vector<int> threads   = {1, 2, 4, 8};
@@ -181,6 +181,6 @@ static int runBenchmark(){
 
     Benchmark::writeDat("datos/benchmark results.dat", results);
     Benchmark::writeScalingAnalysis(results, m, s, "datos/scaling analysis.dat");
-    
+
     return 0;
 }
