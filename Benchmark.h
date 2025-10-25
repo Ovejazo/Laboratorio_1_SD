@@ -72,4 +72,6 @@ public:
     static void writeScalingAnalysis(const std::vector<RunResults>& rows,
                                     double t1_mean, double t1_std,
                                     const std::string& path);
+
+    static int runBenchmark();
 };

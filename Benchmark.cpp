@@ -150,3 +150,37 @@ void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
           << best->getSchedule() << " " << best->getChunk() << "\n";
     }
 }
+
+static int runBenchmark(){
+    std::vector<int> schedules = {0, 1, 2};      // static, dynamic, guided
+    std::vector<int> chunks    = {0, 64, 256};   // 0 => sin chunk explícito
+    std::vector<int> threads   = {1, 2, 4, 8};
+
+    std::filesystem::create_directories("datos");
+
+    std::vector<double> t1_samples;
+    for(int r = 0; r < 10; ++r){
+        t1_samples.push_back(Benchmark::run_once_benchmark(0, 0, 1));
+    }
+
+    double m = 0.0;
+    for(double x : t1_samples) m += x;
+    m /= t1_samples.size();
+    double s2 = 0.0;
+    for (double x : t1_samples){
+        double d = x - m;
+        s2 += d*d;
+    }
+    double s = (t1_samples.size() > 1) ? std::sqrt(s2/(t1_samples.size()-1)) : 0.0;
+
+    auto results = Benchmark::runGrid(
+        schedules, chunks, threads,
+        10,
+        Benchmark::run_once_benchmark,
+        m, s);
+
+    Benchmark::writeDat("datos/benchmark results.dat", results);
+    Benchmark::writeScalingAnalysis(results, m, s, "datos/scaling analysis.dat");
+    
+    return 0;
+}
