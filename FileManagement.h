@@ -7,9 +7,15 @@
 class Network;
 class WavePropagator;
 
+/*
+Abstracción:
+Clase creada para realizar los graficos/representaciones visuales del comportamiento de la propagación solicitados
+*/
+
+
 class FileManagement {
 public:
-
+    //metodos
     static void crearCarpeta();
     static bool openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat);
 

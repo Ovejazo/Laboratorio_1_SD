@@ -5,16 +5,28 @@
 #include "WavePropagation.h"
 #include "Network.h"
 
-
-//Constructor de WavePropagator
+/*
+metodo: WavePropagator
+descripcion: constructor de wavepropagator
+retorno: -
+*/
 WavePropagator::WavePropagator(Network *net, double dt, std::vector<double> src, double initial_energy) 
     : network(net), time_step(dt), sources(src), energy(initial_energy){}
     
-//GETTERS
+
+/*
+metodo: GetEnergy
+descripcion: obtiene la energia actual
+retorno: -
+*/
 double WavePropagator::GetEnergy(){ return energy; }
 
-//Vamos a calcular la energía
-//Sera el calculo serial
+
+/*
+metodo: calculateEnergy
+descripcion: calculo de energia para el caso lineal
+retorno: -
+*/
 void WavePropagator::calculateEnergy(){
     const std::vector<Node>& nodes = network->getNodes();
     this->energy = 0.0;
@@ -24,6 +36,11 @@ void WavePropagator::calculateEnergy(){
     }
 }
 
+/*
+metodo: calculateENergy
+descripcion: 
+retorno: -
+*/
 //Ahora lo vamos a realizar, pero con un metodo
 void WavePropagator::calculateEnergy(int method){
     const std::vector<Node>& nodes = network->getNodes();
@@ -46,7 +63,11 @@ void WavePropagator::calculateEnergy(int method){
     }
 }
 
-//Ahora lo vamos a realizar, pero con un metodo
+/*
+metodo: calculateEnergy
+descripcion: 
+retorno: -
+*/
 void WavePropagator::calculateEnergy(int method, bool use_private){
     const std::vector<Node>& nodes = network->getNodes();
     this->energy = 0.0;
@@ -83,6 +104,11 @@ void WavePropagator::calculateEnergy(int method, bool use_private){
     }
 }
 
+/*
+metodo: processNodes
+descripcion: 
+retorno: -
+*/
 void WavePropagator::processNodes(){
     const std::vector<Node>& nodes = network->getNodes();
 
@@ -94,7 +120,11 @@ void WavePropagator::processNodes(){
     std::cout << "La suma de las amplitudes es: " << sum << std::endl;
 }
 
-
+/*
+metodo: processNodes
+descripcion: 
+retorno: -
+*/
 void WavePropagator::processNodes(int task_type){
 
     //definimos el tipo de tarea que se va aplicar
@@ -134,7 +164,11 @@ void WavePropagator::processNodes(int task_type){
     }
 }
 
-
+/*
+metodo: processNodes
+descripcion: 
+retorno: -
+*/
 void WavePropagator::processNodes(int task_type, bool use_single){
     if(use_single){
         //Lo usamos para imprimir
@@ -170,6 +204,13 @@ void WavePropagator::processNodes(int task_type, bool use_single){
     }
 }
 
+
+
+/*
+metodo: simulatePhasesBarrier
+descripcion: 
+retorno: -
+*/
 void WavePropagator::simulatePhasesBarrier(){
     std::vector<Node>& nodes = network->getNodes();
     std::vector<double> temp(nodes.size(), 0.0);
@@ -194,7 +235,11 @@ void WavePropagator::simulatePhasesBarrier(){
 
 }
 
-
+/*
+metodo: parallelInitializationSingle
+descripcion: 
+retorno: -
+*/
 void WavePropagator::parallelInitializationSingle() {
     std::vector<Node>& nodes = network->getNodes();
 
@@ -211,6 +256,11 @@ void WavePropagator::parallelInitializationSingle() {
     }
 }
 
+/*
+metodo: calculateMetricsFirstprivate
+descripcion: 
+retorno: -
+*/
 void WavePropagator::calculateMetricsFirstprivate() {
     std::vector<Node>& nodes = network->getNodes();
     double offset = 10.0; // Ejemplo: cada hilo parte de este valor
@@ -227,6 +277,11 @@ void WavePropagator::calculateMetricsFirstprivate() {
     }
 }
 
+/*
+metodo: calculateFInalStateLastprivate
+descripcion: 
+retorno: -
+*/
 void WavePropagator::calculateFinalStateLastprivate() {
     std::vector<Node>& nodes = network->getNodes();
     double last_amplitude = 0.0;
