@@ -94,8 +94,8 @@ Ejemplos:
     - ./wave_propagation -benchmark
 
 5. Si se quiere graficar y ver una animación que permita apreciar el comportamiento de la onda en python, ejecutamos el siguiente comando.
-    - python3 graficar_resultados.py --mode 1d --input "wave evolution.dat" --output wave_1d.gif
-    - python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "wave evolution.dat" --output wave_2d.gif
+    - python3 graficar_resultados.py --mode 1d --input "datos/wave evolution.dat" --output wave_1d.gif
+    - python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "datos/wave evolution.dat" --output wave_2d.gif
 
 Ejemplos:
 ```bash

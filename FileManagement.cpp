@@ -106,9 +106,9 @@ void FileManagement::configureExternalSource(Network& myNetwork, int num_nodes) 
     enum class SourcePreset { Zero, Fixed, Random, Sine };
 
     //constexpr SourcePreset kSource = SourcePreset::Zero;
-    constexpr SourcePreset kSource = SourcePreset::Fixed;
+    //constexpr SourcePreset kSource = SourcePreset::Fixed;
     //constexpr SourcePreset kSource = SourcePreset::Random;
-    //constexpr SourcePreset kSource = SourcePreset::Sine;
+    constexpr SourcePreset kSource = SourcePreset::Sine;
 
     constexpr double kFixedValue = 0.05;           // Fixed
     constexpr double kRandMin = -0.05;             // Random
