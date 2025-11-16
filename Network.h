@@ -5,9 +5,14 @@
 #include <vector>
 #include <string>
 
+/*
+Abstracción:
+Clase network  encaargada de la creacion de la estructura que poseerá la malla de propagación de energia
+*/
 
 class Network {
 public: 
+//clase tipo numero para definir el tipo de fuente
     enum class SourceMode{
         Zero = 0,
         Fixed = 1,
@@ -16,6 +21,7 @@ public:
     };
 
 private:
+    //datos privados
     std::vector<Node> nodes;
     int network_size;
     double diffusion_coeff;
@@ -30,7 +36,6 @@ private:
     std::vector<double> sources;
     double time_step = 0.0;
     double current_time = 0.0;
-    //string tipo_network;
 
     //Configuración de fuente
     SourceMode source_mode = SourceMode::Fixed;
@@ -47,7 +52,7 @@ public:
     Network(int size, double diff_coeff, double damp_coeff);
     //Network(int size, double diff_coeff, double damp_coeff, std::vector<double> src, double dt);
     
-    //Funciones que piden en el enunciado
+    //Funciones solicitdas en el enunciado
     void initializeRandomNetwork();
     void initializeRegularNetwork(int dimensions, int w = 0, int h = 0);
 
@@ -70,8 +75,7 @@ public:
     };
 
     double getCurrentTime() const {return current_time;}
-    SourceMode getSourceMode() const {return source_mode;}
-    //std::string getNetworkType() const;
+    SourceMode getSourceMode() const {return source_mode;
 
     //SETTERS
     void setTimeStep(double dt) {time_step = dt;}
@@ -80,10 +84,8 @@ public:
     void generateRandomSources(double min_value, double max_value, unsigned int seed = 5489u);
     void setSineSource(double amplitude, double omega); // S(t)=A sin(ωt)
     void setSourceMode(SourceMode mode) { source_mode = mode; }
-    //void setDimensionesDeMalla(int ancho, int alto);
-    //void setNetworkType(const std::string& type);
 
-    //Demás funciones
+    //otros   metodos
     void initializeLinearNetwork();
     void initializeGrid2D(int width, int height);
     void initializeRandomNetwork(double connection_probability);
@@ -98,6 +100,7 @@ public:
     void propagateWavesCollapse();
 
 private:
+    //otros metodos privados
     void propagateCore(int schedule_type, int chunk_size, bool use_chunk);
     inline double evalSourceTerm(int i, double t) const;
 };

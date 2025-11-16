@@ -8,6 +8,11 @@
 #include "Network.h"
 
 //Funciones de network
+/*
+metodo: Network
+descripcion: 
+retorno: -
+*/
 Network::Network(int size, double diff_coeff, double damp_coeff) 
     :   network_size(size),
         diffusion_coeff(diff_coeff),
@@ -29,6 +34,11 @@ Network::Network(int size, double diff_coeff, double damp_coeff)
         scratch_amplitudes.assign(network_size, 0.0);
 }
 
+/*
+metodo: initializeREgularNetwork
+descripcion: 
+retorno: -
+*/
 void Network::initializeRegularNetwork(int dimensions, int w, int h){
     if (dimensions == 1){
 
@@ -67,6 +77,11 @@ void Network::initializeRegularNetwork(int dimensions, int w, int h){
     scratch_amplitudes.assign(network_size, 0.0);
 }
 
+/*
+metodo: setSources
+descripcion: 
+retorno: -
+*/
 void Network::setSources(const std::vector<double>& src){
     sources = src;
     if ((int)sources.size() != network_size){
@@ -75,11 +90,21 @@ void Network::setSources(const std::vector<double>& src){
     source_mode = SourceMode::Fixed;
 }
 
+/*
+metodo: setZeroSource
+descripcion: 
+retorno: -
+*/
 void Network::setZeroSource(){
     sources.assign(network_size, 0.0);
     source_mode = SourceMode::Zero;
 }
 
+/*
+metodo: generateRandomSources
+descripcion: 
+retorno: -
+*/
 void Network::generateRandomSources(double min_value, double max_value, unsigned int seed){
     std::mt19937 rng(seed);
     std::uniform_real_distribution<double> dist(min_value, max_value);
@@ -92,12 +117,22 @@ void Network::generateRandomSources(double min_value, double max_value, unsigned
     source_mode = SourceMode::Random;
 }
 
+/*
+metodo: setSineSource
+descripcion: 
+retorno: -
+*/
 void Network::setSineSource(double amplitude, double omega){
     source_amplitude = amplitude;
     source_omega = omega;
     source_mode = SourceMode::Sine_uniform;
 }
 
+/*
+metodo: evalSourceTerm
+descripcion: 
+retorno: -
+*/
 inline double Network::evalSourceTerm(int i, double t) const {
     switch (source_mode) {
         case SourceMode::Zero:
@@ -113,18 +148,38 @@ inline double Network::evalSourceTerm(int i, double t) const {
     }
 }
 
+/*
+metodo: propagateWaves
+descripcion: 
+retorno: -
+*/
 void Network::propagateWaves(){
     propagateCore(0, 0, false);
 }
 
+/*
+metodo: propagateWaves
+descripcion: 
+retorno: -
+*/
 void Network::propagateWaves(int schedule_type){
     propagateCore(schedule_type, 0, false);
 }
 
+/*
+metodo: propagateWaves
+descripcion: 
+retorno: -
+*/
 void Network::propagateWaves(int schedule_type, int chunk_size){
     propagateCore(schedule_type, chunk_size, true);
 }
 
+/*
+metodo: propagateCore
+descripcion: 
+retorno: -
+*/
 void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
     //Vamos a imprimir un mensaje de que entro a la función
     if(!initialized){
@@ -208,6 +263,11 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
     current_time += time_step;
 }
 
+/*
+metodo: propagateWavesCollapse
+descripcion: 
+retorno: -
+*/
 void Network::propagateWavesCollapse(){
 
     if(!initialized){
@@ -256,4 +316,9 @@ void Network::propagateWavesCollapse(){
     current_time += time_step;
 }
 
+/*
+metodo: getNode
+descripcion: 
+retorno: -
+*/
 Node& Network::getNode(int i){ return this->nodes[i]; }

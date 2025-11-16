@@ -3,23 +3,33 @@
 #include <vector>
 #include <functional>
 
+/*
+Abstracción:
+Esta clase corresponden a las clases necesarias para utilizar Benchmark
+*/
+
 class Estadisticas{
 public:
+    //constructores
     Estadisticas() : media(0.0), stddev(0.0) {}
     Estadisticas(double media, double stddev) : media(media), stddev(stddev) {}
 
+    //otros metodos
     double getMedia() const { return media; }
     double getStddev() const { return stddev; }
     void setMedia(double v) { media = v; }
     void setStddev(double v) { stddev = v; }
 
+    
 private:
+    //datos privados
     double media;
     double stddev;
 };
 
 class RunResults{
 public:
+    //constructores
     RunResults() :
         threads(1), schedule(0), chunk(0),
         time(), speedup(1.0), efficiency(1.0),
@@ -33,7 +43,7 @@ public:
           time(time), speedup(speedup), efficiency(efficiency),
           speedupErr(speedupErr), efficiencyErr(efficiencyErr) {}
     
-    // Getters
+    // otros metodos - getters
     int getThreads() const { return threads; }
     int getSchedule() const { return schedule; }
     int getChunk() const { return chunk; }
@@ -45,6 +55,7 @@ public:
 
 
 private:
+    //datos privados
     int threads;
     int schedule;
     int chunk;
@@ -57,6 +68,7 @@ private:
 
 class Benchmark{
 public:
+    //Otros metodos
     static std::vector<RunResults> runGrid(
         const std::vector<int>& schedules,
         const std::vector<int>& chunks,

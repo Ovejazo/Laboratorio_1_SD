@@ -10,10 +10,20 @@
 #include "WavePropagation.h"
 #include "FileManagement.h"
 
+/*
+metodo: runGrid
+descripcion: 
+retorno: -
+*/
 void FileManagement::crearCarpeta() {
     std::filesystem::create_directories("datos");
 }
 
+/*
+metodo: runGrid
+descripcion: 
+retorno: -
+*/
 bool FileManagement::openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat){
     csv.open("results.csv");
     wave_dat.open("datos/wave evolution.dat");
@@ -26,6 +36,11 @@ bool FileManagement::openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, s
     return true;
 }
 
+/*
+metodo: writeHeader
+descripcion: 
+retorno: -
+*/
 void FileManagement::writeHeader(std::ofstream& csv,
                          std::ofstream& wave_dat,
                          std::ofstream& energy_dat,
@@ -34,13 +49,18 @@ void FileManagement::writeHeader(std::ofstream& csv,
     wave_dat << "# Time_Step";
     for (int i = 0; i < num_nodes; ++i) {
         csv << ",Node_" << i;
-        wave_dat << " Node_" << i; // <-- espacio antes de Node_
+        wave_dat << " Node_" << i; 
     }
     csv << "\n";
     wave_dat << "\n";
     energy_dat << "# Time_Step energy\n";
 }
 
+/*
+metodo: writeInitialState
+descripcion: 
+retorno: -
+*/
 void FileManagement::writeInitialState(Network& myNetwork,
                               WavePropagator& propagation,
                               std::ofstream& csv,
@@ -65,12 +85,22 @@ void FileManagement::writeInitialState(Network& myNetwork,
     energy_dat << 0 << " " << std::scientific << std::setprecision(6) << propagation.GetEnergy() << "\n";        
 }
 
+/*
+metodo: finalizeSimulation
+descripcion: 
+retorno: -
+*/
 void FileManagement::finalizeSimulation(double duracion, std::ofstream& csv){
     std::cout << "Tiempo total: " << duracion << "s\n";
     csv.close();
     std::cout << "Datos de evolucion guardados en 'results.csv'." << std::endl;
 }
 
+/*
+metodo: configureExternalSource
+descripcion: 
+retorno: -
+*/
 void FileManagement::configureExternalSource(Network& myNetwork, int num_nodes) {
 
     enum class SourcePreset { Zero, Fixed, Random, Sine };

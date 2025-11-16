@@ -6,7 +6,11 @@
 #include "Benchmark.h"
 #include "Network.h"
 
-
+/*
+metodo: computeMeanStd
+descripcion: 
+retorno: -
+*/
 static Estadisticas computeMeanStd(const std::vector<double>& v){
     if(v.empty()) return Estadisticas(0.0, 0.0);
 
@@ -24,6 +28,11 @@ static Estadisticas computeMeanStd(const std::vector<double>& v){
     return Estadisticas(m, std::sqrt(s2));
 }
 
+/*
+metodo: run_once_benchmark
+descripcion: 
+retorno: -
+*/
 double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
     omp_set_num_threads(threads);
 
@@ -51,14 +60,19 @@ double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
     return (t1 - t0);
 }
 
+
+/*
+metodo: runGrid
+descripcion: 
+retorno: -
+*/
 std::vector<RunResults> Benchmark::runGrid(
     const std::vector<int>& schedules,
     const std::vector<int>& chunks,
     const std::vector<int>& threadsList,
     int repetitions,
     const std::function<double(int,int,int)>& runFn,
-    double t1_mean, double t1_std)
-{
+    double t1_mean, double t1_std){
 
     //Declaramos la salida, que sera un vector de tipo "RunResults"
     std::vector<RunResults> out;
@@ -94,6 +108,13 @@ std::vector<RunResults> Benchmark::runGrid(
     return out;
 }
 
+
+
+/*
+metodo: writeDat
+descripcion: 
+retorno: -
+*/
 void Benchmark::writeDat(const std::string& path, const std::vector<RunResults>& rows) {
     std::ofstream f(path);
     f << "#threads schedule chunk time_mean time_std speedup efficiency sigma_Sp sigma_Ep\n";
@@ -110,6 +131,11 @@ void Benchmark::writeDat(const std::string& path, const std::vector<RunResults>&
     }
 }
 
+/*
+metodo: writeScalingAnalysis
+descripcion: 
+retorno: -
+*/
 void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
                                  double t1_mean, double t1_std,
                                  const std::string& path) {
@@ -151,6 +177,11 @@ void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
     }
 }
 
+/*
+metodo: runBenchmark
+descripcion: 
+retorno: entero que indica si funciona correctamente
+*/
 int Benchmark::runBenchmark(){
     std::vector<int> schedules = {0, 1, 2};      // static, dynamic, guided
     std::vector<int> chunks    = {0, 64, 256};   // 0 => sin chunk explícito
