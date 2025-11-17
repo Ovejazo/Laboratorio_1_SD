@@ -10,7 +10,7 @@
 //Funciones de network
 /*
 metodo: Network
-descripcion: 
+descripcion: Es el constructor de la clase Network
 retorno: -
 */
 Network::Network(int size, double diff_coeff, double damp_coeff) 
@@ -35,8 +35,8 @@ Network::Network(int size, double diff_coeff, double damp_coeff)
 }
 
 /*
-metodo: initializeREgularNetwork
-descripcion: 
+metodo: initializeRegularNetwork
+descripcion: Inicializa la red, puede ser 1D o 2D
 retorno: -
 */
 void Network::initializeRegularNetwork(int dimensions, int w, int h){
@@ -79,7 +79,7 @@ void Network::initializeRegularNetwork(int dimensions, int w, int h){
 
 /*
 metodo: setSources
-descripcion: 
+descripcion: Define los valores de las fuentes externas
 retorno: -
 */
 void Network::setSources(const std::vector<double>& src){
@@ -92,7 +92,7 @@ void Network::setSources(const std::vector<double>& src){
 
 /*
 metodo: setZeroSource
-descripcion: 
+descripcion: Establece las fuentes externas a cero
 retorno: -
 */
 void Network::setZeroSource(){
@@ -102,7 +102,7 @@ void Network::setZeroSource(){
 
 /*
 metodo: generateRandomSources
-descripcion: 
+descripcion: Genera fuentes externas aleatorias dentro de un rango dado
 retorno: -
 */
 void Network::generateRandomSources(double min_value, double max_value, unsigned int seed){
@@ -119,7 +119,7 @@ void Network::generateRandomSources(double min_value, double max_value, unsigned
 
 /*
 metodo: setSineSource
-descripcion: 
+descripcion: Establece una fuente externa senoidal
 retorno: -
 */
 void Network::setSineSource(double amplitude, double omega){
@@ -130,7 +130,7 @@ void Network::setSineSource(double amplitude, double omega){
 
 /*
 metodo: evalSourceTerm
-descripcion: 
+descripcion: Evalúa el término de la fuente externa en el nodo i y tiempo t
 retorno: -
 */
 inline double Network::evalSourceTerm(int i, double t) const {
@@ -150,7 +150,7 @@ inline double Network::evalSourceTerm(int i, double t) const {
 
 /*
 metodo: propagateWaves
-descripcion: 
+descripcion: Función que propaga las ondas en la red cuando esta en modo serial
 retorno: -
 */
 void Network::propagateWaves(){
@@ -159,7 +159,7 @@ void Network::propagateWaves(){
 
 /*
 metodo: propagateWaves
-descripcion: 
+descripcion: Función que propaga las ondas en la red con paralelización
 retorno: -
 */
 void Network::propagateWaves(int schedule_type){
@@ -168,7 +168,7 @@ void Network::propagateWaves(int schedule_type){
 
 /*
 metodo: propagateWaves
-descripcion: 
+descripcion: Función que propaga las ondas en la red con paralelización y tamaño de chunk 
 retorno: -
 */
 void Network::propagateWaves(int schedule_type, int chunk_size){
@@ -177,7 +177,7 @@ void Network::propagateWaves(int schedule_type, int chunk_size){
 
 /*
 metodo: propagateCore
-descripcion: 
+descripcion: Función central que propaga las ondas en la red con diferentes opciones de paralelización
 retorno: -
 */
 void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
@@ -190,7 +190,7 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
         time_step = 0.01;
     }
 
-    //Definimos las variables que vamos a usarç
+    //Definimos las variables que vamos a usar
     const int N = network_size;
     const double D = diffusion_coeff;
     const double gamma = damping_coeff;
@@ -265,7 +265,7 @@ void Network::propagateCore(int schedule_type, int chunk_size, bool use_chunk){
 
 /*
 metodo: propagateWavesCollapse
-descripcion: 
+descripcion: Función que propaga las ondas en la red 2D utilizando la cláusula collapse
 retorno: -
 */
 void Network::propagateWavesCollapse(){
@@ -318,7 +318,7 @@ void Network::propagateWavesCollapse(){
 
 /*
 metodo: getNode
-descripcion: 
+descripcion: Función que obtiene los nodos
 retorno: -
 */
 Node& Network::getNode(int i){ return this->nodes[i]; }

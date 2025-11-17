@@ -66,11 +66,9 @@ int main(int argc, char** argv) {
     if(!FileManagement::openOutFiles(csv, wave_dat, energy_dat)){
         return 1;
     }
-
     
     //2. Escribimos la cabecera de los archivos
     FileManagement::writeHeader(csv, wave_dat, energy_dat, num_nodes);
-
 
     //3. Se escriben los estados iniciales
     FileManagement::writeInitialState(myNetwork, propagation, csv, wave_dat, energy_dat);
@@ -91,7 +89,7 @@ int main(int argc, char** argv) {
 
         std::vector<double> current_amplitudes = myNetwork.getCurrentAmplitudes();
 
-        // promedio de amplitudes
+        // Se consigue el promedio de la amplitudes
         double avg = 0.0;
         for (double v : current_amplitudes) avg += v;
         avg /= current_amplitudes.size();
