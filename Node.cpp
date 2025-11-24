@@ -6,7 +6,7 @@
 
 /*
 metodo: node
-descripcion: constructor del elemento nodo,,,, ellll cual posee su id, amplitud actual y amplitud previa
+descripcion: constructor del elemento nodo, el cual posee su id, amplitud actual y amplitud previa
 retorno: un nodo
 */
 Node::Node(int node_id, double initial_amplitude) 
@@ -28,7 +28,7 @@ double Node::getAmplitude() const { return amplitude; }
 
 /*
 metodo: getPreviousAmplitude
-descripcion: 
+descripcion: Obtiene la amplitud previa del nodo
 retorno: double amplitud que posee un nodo
 */
 double Node::getPreviousAmplitude() const { return previous_amplitude; }
@@ -43,7 +43,7 @@ const std::vector<int>& Node::getNeighbors() const { return neighbors; }
 
 /*
 metodo: getDegree
-descripcion: 
+descripcion: obtiene el grado de un nodo, es decir, la cantidad de nodos vecinos que posee
 retorno: entero grado de un nodo
 */
 int Node::getDegree() const { return neighbors.size(); }
@@ -58,7 +58,7 @@ void Node::setAmplitude(double new_amplitude) { amplitude = new_amplitude; }
 
 /*
 metodo: setPreviousAmplitude
-descripcion: 
+descripcion: Coloca la amplitud previa
 retorno: -
 */
 void Node::setPreviousAmplitude(double prev_amp) { previous_amplitude = prev_amp; }

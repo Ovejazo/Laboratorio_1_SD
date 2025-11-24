@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
 
     //Creamos un red. 1 para 1D y 2 para 2D
     myNetwork.initializeRegularNetwork(1);
+    //myNetwork.initializeRegularNetwork(2, 10, 10);
     myNetwork.setTimeStep(dt);
 
     FileManagement::configureExternalSource(myNetwork, num_nodes);

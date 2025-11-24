@@ -11,8 +11,8 @@
 #include "FileManagement.h"
 
 /*
-metodo: runGrid
-descripcion: 
+metodo: crearCarpeta
+descripcion: Crea la carpeta "datos" si no existe
 retorno: -
 */
 void FileManagement::crearCarpeta() {
@@ -20,8 +20,8 @@ void FileManagement::crearCarpeta() {
 }
 
 /*
-metodo: runGrid
-descripcion: 
+metodo: openOutFiles
+descripcion: Abre los archivos de salida para resultados, evolución de ondas y conservación de energía
 retorno: -
 */
 bool FileManagement::openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, std::ofstream& energy_dat){
@@ -38,7 +38,8 @@ bool FileManagement::openOutFiles(std::ofstream& csv, std::ofstream& wave_dat, s
 
 /*
 metodo: writeHeader
-descripcion: 
+descripcion: Escribe los encabezados en los archivos de salida para resultados,
+             evolución de ondas y conservación de energía
 retorno: -
 */
 void FileManagement::writeHeader(std::ofstream& csv,
@@ -58,7 +59,7 @@ void FileManagement::writeHeader(std::ofstream& csv,
 
 /*
 metodo: writeInitialState
-descripcion: 
+descripcion: Escribe el estado inicial de la simulación en los archivos de salida
 retorno: -
 */
 void FileManagement::writeInitialState(Network& myNetwork,
@@ -87,7 +88,8 @@ void FileManagement::writeInitialState(Network& myNetwork,
 
 /*
 metodo: finalizeSimulation
-descripcion: 
+descripcion: Finaliza la simulación cerrando el archivo CSV y mostrando el tiempo total
+             de ejecución en la consola
 retorno: -
 */
 void FileManagement::finalizeSimulation(double duracion, std::ofstream& csv){
@@ -98,7 +100,7 @@ void FileManagement::finalizeSimulation(double duracion, std::ofstream& csv){
 
 /*
 metodo: configureExternalSource
-descripcion: 
+descripcion: Estaba configurando la fuente externa en la red, aquí se tiene varias opciones predefinidas, zero, ajustado, random y senoidal.
 retorno: -
 */
 void FileManagement::configureExternalSource(Network& myNetwork, int num_nodes) {
@@ -106,9 +108,9 @@ void FileManagement::configureExternalSource(Network& myNetwork, int num_nodes) 
     enum class SourcePreset { Zero, Fixed, Random, Sine };
 
     //constexpr SourcePreset kSource = SourcePreset::Zero;
-    //constexpr SourcePreset kSource = SourcePreset::Fixed;
+    constexpr SourcePreset kSource = SourcePreset::Fixed;
     //constexpr SourcePreset kSource = SourcePreset::Random;
-    constexpr SourcePreset kSource = SourcePreset::Sine;
+    //constexpr SourcePreset kSource = SourcePreset::Sine;
 
     constexpr double kFixedValue = 0.05;           // Fixed
     constexpr double kRandMin = -0.05;             // Random

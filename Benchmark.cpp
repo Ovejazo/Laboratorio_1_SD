@@ -8,16 +8,21 @@
 
 /*
 metodo: computeMeanStd
-descripcion: 
+descripcion: Calcula la media y la desviación estandar de un conjunto de tiempos
 retorno: -
 */
 static Estadisticas computeMeanStd(const std::vector<double>& v){
     if(v.empty()) return Estadisticas(0.0, 0.0);
 
+    //Definimos la variable para conseguir la media
     double m = 0.0;
     for(double x : v) m += x;
+
+    // Calculamos la media
     m /= static_cast<double>(v.size());
     double s2 = 0.0;
+
+    //Calculamos la desviación estándar
     if(v.size() > 1){
         for(double x : v){
             double d = x - m;
@@ -25,12 +30,14 @@ static Estadisticas computeMeanStd(const std::vector<double>& v){
         }
         s2 /= static_cast<double>(v.size() - 1);
     }
+
+    //Devolvemos los valores
     return Estadisticas(m, std::sqrt(s2));
 }
 
 /*
 metodo: run_once_benchmark
-descripcion: 
+descripcion: Ejecuta la simulación una vez con los parámetros dados 
 retorno: -
 */
 double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
@@ -63,7 +70,8 @@ double Benchmark::run_once_benchmark(int schedule, int chunk, int threads){
 
 /*
 metodo: runGrid
-descripcion: 
+descripcion: Ejecuta una malla de combinaciones de parámetros y recopila los resultados 
+             (schedule x chunk x threads), para cada ejecución obtiene promedios de tiempo, errores.
 retorno: -
 */
 std::vector<RunResults> Benchmark::runGrid(
@@ -112,7 +120,7 @@ std::vector<RunResults> Benchmark::runGrid(
 
 /*
 metodo: writeDat
-descripcion: 
+descripcion: Los resultados obtenidos de la grilla se escriben en un archivo .dat
 retorno: -
 */
 void Benchmark::writeDat(const std::string& path, const std::vector<RunResults>& rows) {
@@ -133,7 +141,8 @@ void Benchmark::writeDat(const std::string& path, const std::vector<RunResults>&
 
 /*
 metodo: writeScalingAnalysis
-descripcion: 
+descripcion: Para cada número de threads, selecciona la mejor configuración (menor tiempo)
+             y escribe un análisis de escalabilidad en un archivo .dat
 retorno: -
 */
 void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
@@ -179,7 +188,8 @@ void Benchmark::writeScalingAnalysis(const std::vector<RunResults>& rows,
 
 /*
 metodo: runBenchmark
-descripcion: 
+descripcion: Ejecuta una corrida de benchmark completa de manera automatica, mide T1, corre la grilla 
+             y escribe en los archivos .dat
 retorno: entero que indica si funciona correctamente
 */
 int Benchmark::runBenchmark(){

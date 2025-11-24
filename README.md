@@ -4,7 +4,7 @@ Asignatura:
 - Sistemas Distribuidos y paralelos
 
 Profesor:
-- Miguel carcamo
+- Miguel Carcamo
 
 Participantes: 
 - Thomas Riffo 21134817-8
@@ -84,7 +84,7 @@ Ejemplos:
 # 2D con collapse(2) (si la malla es 2D en el main)
 ./wave_propagation 2 8 -collapse
 ```
-    3.5 En el main se puede cambiar el tipo de fuente externa que se quiere usar, hay 4 fuentes distintas a usar: 
+    3.5 En el FileManagement se puede cambiar el tipo de fuente externa que se quiere usar, hay 4 fuentes distintas a usar: 
         - "constexpr SourcePreset kSource = SourcePreset::Zero;"
         - "constexpr SourcePreset kSource = SourcePreset::Fixed;"
         - "constexpr SourcePreset kSource = SourcePreset::Random;"
@@ -148,3 +148,49 @@ python3 analisis.py
 # Personalizar (si lo deseas)
 python3 analisis.py --infile "datos/benchmark results.dat" --outdir datos --outfile "performance plots.png"
 ```
+
+
+# Ejemplos de ejecución
+La ejecución predeterminada esta incialmente puesta en 1D con una fuente externa ajustada en 0.05.
+
+## Recomendaciones:
+
+- Se recomienda ir cambiando los parametros del laboratorio, la cantidad de Nodos, D, gamma, dt y los pasos.
+
+- Para cambiar la dimensión de la red hay que ir al main a la función "initializeRegularNetwork" y cambiar el número 1 al número 2.
+
+- Para cambiar la fuente externa se tiene que ir al archivo "FileManagement.cpp" y dentro del codigo en la función "configureExternalSource" se tiene que descomentar el tipo de fuente que se desea y comentar las demás fuentes para que no hayan problemas de ejecución.
+
+- Por cada una de las siguientes ejecuciones se pueden ejecutar los correspondientes codigos de python para conseguir los graficos y los archivos .dat.
+
+    - Para una red 1D
+        - python3 graficar_resultados.py --mode 1d --outdir datos
+
+    - Para una red 2D
+        - python3 graficar_resultados.py --mode 2d --width 10 --height 10 --outdir datos
+    
+    - Usando un archivo específico
+        - python3 graficar_resultados.py --mode 2d --width 100 --height 100 --input "datos/wave evolution.dat" --outdir datos --output onda_2d.gif
+
+- Cuando se use la extensión benchmark, entregara más detalla en puntos dat, con esta información se puede usar para ejecutar el codigo de python analisis.py
+    - python3 analisis.py
+
+1. Ejecución secuencial tanto 1D como 2D
+    - ./wave_propagation
+
+2. Ejecución paralela con static
+    - ./wave_propagation 0
+
+3. Ejecución paralela con dynamic, y con chunk = 4 y con chunk = 8. 
+    - ./wave_propagation 1 4
+    - ./wave_propagation 1 8
+
+4. Ejecución paralela con guided y chunk = 8
+    - ./wave_propagation 2 8
+
+5. Ejecución paralela 2D con collapse.
+    - ./wave_propagation 2 8 -collapse
+
+
+
+
